@@ -253,7 +253,7 @@ public class ShapeRenderer : MonoBehaviour
     {
         if (fill)
         {
-            mf.mesh = GenerateMesh(vertices);
+            mf.mesh = GenerateMesh2(vertices);
         }
         else
         {
@@ -384,7 +384,7 @@ public class ShapeRenderer : MonoBehaviour
     /// <summary>
     /// Generates a 2D shape mesh given array of 2D verticies.
     /// </summary>
-    public static Mesh GenerateMesh(Vector2[] vertices)
+    public static Mesh GenerateMesh1(Vector2[] vertices)
     {
         Mesh newMesh = new Mesh();
         int nPoints = vertices.Length;
@@ -420,6 +420,54 @@ public class ShapeRenderer : MonoBehaviour
         newMesh.Clear();
         newMesh.vertices = points;
         newMesh.triangles = triangles;
+        newMesh.uv = uv;
+
+        return newMesh;
+    }
+
+    public static Mesh GenerateMesh2(Vector2[] vertices)
+    {
+        Mesh newMesh = new Mesh();
+        int nPoints = vertices.Length;
+        Vector3[] points = new Vector3[nPoints];
+        Vector2[] uv = new Vector2[nPoints];
+        float minX = Mathf.Infinity;
+        float maxX = Mathf.NegativeInfinity;
+        float minY = Mathf.Infinity;
+        float maxY = Mathf.NegativeInfinity;
+        for (int i = 0; i < nPoints; i++)
+        {
+            Vector2 actual = vertices[i];
+            minX = Mathf.Min(minX, actual.x);
+            maxX = Mathf.Max(maxX, actual.x);
+            minY = Mathf.Min(minY, actual.y);
+            maxY = Mathf.Max(maxY, actual.y);
+            points[i] = new Vector3(actual.x, actual.y, 0);
+
+        }
+        float denX = 1.0f / (maxX - minX);
+        float denY = 1.0f / (maxY - minY);
+        for (int i = 0; i < nPoints; i++)
+        {
+            Vector2 actual = vertices[i];
+            float u = (actual.x - minX) * denX;
+            float v = (actual.y - minY) * denY;
+            uv[i] = new Vector2(u, v);
+        }
+
+        Triangulator tr = new Triangulator(vertices);
+
+        List<int> indices1 = null;
+        List<Vector3> vertices1 = null;
+        List<List<Vector2>> holes = new List<List<Vector2>>();
+
+
+        TriangleDotNET.Triangulate2(vertices, holes, out indices1, out vertices1);
+        //int[] triangles = tr.Triangulate();
+
+        newMesh.Clear();
+        newMesh.vertices = vertices1.ToArray();
+        newMesh.triangles = indices1.ToArray();
         newMesh.uv = uv;
 
         return newMesh;
