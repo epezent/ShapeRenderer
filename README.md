@@ -30,6 +30,7 @@ This project was born out of my frustration with having to constantly reopen Pho
     - Use the built-in PolygonCollider2D point editing tool to create shape geometry in From Collider mode
 - Several built-in scripts for rapidly creating primitives such as Rectangles, Polygons, Triangles, Circles, Diamonds, and more
 - Fast C/C++ DLL plugin handles heavy math and triangulation to keep framerates reasonably high during animation
+- Custom Shaders optimized to use MPBs and Per Renderer data
 
 ## Usage
 
