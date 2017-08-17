@@ -9,8 +9,11 @@ public class AnimateShape : MonoBehaviour {
     public float size;
     public float radius;
 
-	// Use this for initialization
-	void Start () {
+    public Vector2[] points = new Vector2[3];
+    public float sum = 0;
+
+    // Use this for initialization
+    void Start () {
         sr = GetComponent<ShapeRenderer>();
         polygonShape = GetComponent<PolygonShape>();
 	}

@@ -57,11 +57,14 @@ public class ShapeRenderer : MonoBehaviour
     public SetColliderTo setColliderTo = SetColliderTo.Anchors;
     [Tooltip("Shows/hides the LineRenderer, MeshFilter, and MeshRenderer required by this ShapeRenderer. Hidden by default to reduce clutter.")]
     public bool showComponents = false;
+    [Tooltip("Uses Triangulator.dll if true, Triangulator.cs if false.")]
+    public bool useDLL = true;
 
     private Material fillMaterial;
     private Material strokeMaterial;
 
     private int defaultSmoothness = 50;
+
 
     private LineRenderer lr;
     private MeshFilter mf;
@@ -253,7 +256,7 @@ public class ShapeRenderer : MonoBehaviour
     {
         if (fill)
         {
-            mf.mesh = GenerateMesh(vertices);
+            mf.mesh = GenerateMesh(vertices, useDLL);
         }
         else
         {
@@ -384,7 +387,7 @@ public class ShapeRenderer : MonoBehaviour
     /// <summary>
     /// Generates a 2D shape mesh given array of 2D verticies.
     /// </summary>
-    public static Mesh GenerateMesh(Vector2[] vertices)
+    public static Mesh GenerateMesh(Vector2[] vertices, bool useDLL)
     {
         Mesh newMesh = new Mesh();
         int nPoints = vertices.Length;
@@ -414,8 +417,27 @@ public class ShapeRenderer : MonoBehaviour
             uv[i] = new Vector2(u, v);
         }
 
-        Triangulator tr = new Triangulator(vertices);
-        int[] triangles = tr.Triangulate();
+        int[] triangles;
+
+        if (useDLL)
+        {
+            int size = vertices.Length;
+            float[] verticesX = new float[size];
+            float[] verticesY = new float[size];
+            for (int i = 0; i < size; ++i)
+            {
+                verticesX[i] = vertices[i].x;
+                verticesY[i] = vertices[i].y;
+            }
+            int indicesSize = (size - 2) * 3;
+            triangles = new int[indicesSize];
+            TriangulatorDLL.TriagulateDll(verticesX, verticesY, size, triangles, indicesSize);
+        }
+        else
+        {
+            Triangulator tr = new Triangulator(vertices);
+            triangles = tr.Triangulate();
+        }
 
         newMesh.Clear();
         newMesh.vertices = points;
