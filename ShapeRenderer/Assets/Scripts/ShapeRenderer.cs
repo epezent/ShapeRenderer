@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Runtime.InteropServices;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -80,7 +81,8 @@ public class ShapeRenderer : MonoBehaviour
         pc2d = GetComponent<PolygonCollider2D>();
 
         // Create a new Mesh
-        mf.mesh = new Mesh();   
+        mf.sharedMesh = new Mesh();
+        mf.sharedMesh.MarkDynamic();
 
         // Set default Materials
         if (fillMaterial == null)
@@ -146,7 +148,10 @@ public class ShapeRenderer : MonoBehaviour
         // validate MeshFilter
         mf = GetComponent<MeshFilter>();
         if (mf == null)
+        {
             mf = gameObject.AddComponent<MeshFilter>() as MeshFilter;
+            mf.sharedMesh = new Mesh();
+        }
         // validate MeshRenderer
         mr = GetComponent<MeshRenderer>();
         if (mr == null)
@@ -225,6 +230,21 @@ public class ShapeRenderer : MonoBehaviour
     }
 
     //-------------------------------------------------------------------------
+    // DLL IMPORTS
+    //-------------------------------------------------------------------------
+
+    [DllImport("ShapeRenderer", EntryPoint = "triangulate", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+    private static extern int Triangulate(float[] verticesX, float[] verticesY, int verticesSize, int[] indices, int indicesSize);
+
+    [DllImport("ShapeRenderer", EntryPoint = "generate_vertices", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+    private static extern int GenerateVertices(float[] anchorsX, float[] anchorsY, float[] radii, int[] N, int anchorsSize, float[] verticesX, float[] verticesY, int verticesSize);
+
+    [DllImport("ShapeRenderer", EntryPoint = "compute_shape", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+    private static extern int ComputeShape(float[] anchorsX, float[] anchorsY, float[] radii, int[] N, int anchorsSize,
+                                         float[] verticesX, float[] verticesY, int verticesSize,
+                                         int[] indices, int indicesSize, float[] u, float[] v);
+
+    //-------------------------------------------------------------------------
     // PUBLIC API FUNCTIONS
     //-------------------------------------------------------------------------
 
@@ -273,23 +293,20 @@ public class ShapeRenderer : MonoBehaviour
         int[] indices = new int[indicesSize];
 
         // call DLL
-        if (ShapeRendererDLL.ComputeShape(anchorsX, anchorsY, shapeRadii, radiiSmoothness, anchorsSize, verticesX, verticesY, verticesSize, indices, indicesSize, u, v) == 1)
+        if (ComputeShape(anchorsX, anchorsY, shapeRadii, radiiSmoothness, anchorsSize, verticesX, verticesY, verticesSize, indices, indicesSize, u, v) == 1)
         {
             // repack Unity types
-            Vector2[] vertices2 = new Vector2[verticesSize];
-            Vector3[] vertices3 = new Vector3[verticesSize];
+            Vector3[] vertices = new Vector3[verticesSize];
             Vector2[] uv = new Vector2[verticesSize];
-
+            float z = transform.position.z;
             for (int i = 0; i < verticesSize; i++)
             {
-                vertices2[i] = new Vector2(verticesX[i], verticesY[i]);
-                vertices3[i] = new Vector3(verticesX[i], verticesY[i], 0);
+                vertices[i] = new Vector3(verticesX[i], verticesY[i], z);
                 uv[i] = new Vector2(u[i], v[i]);
             }
-
-            UpdateFillGeometry(vertices3, indices, uv);
-            UpdateStrokeGeometry(vertices2);
-            UpdateCollider(vertices2);
+            UpdateFillGeometry(vertices, indices, uv);
+            UpdateStrokeGeometry(vertices);
+            UpdateCollider(vertices);
         }
     }
 
@@ -300,11 +317,11 @@ public class ShapeRenderer : MonoBehaviour
     {
         if (fill)
         {
-            mf.mesh = GenerateMesh(vertices, indices, uv);
+            GenerateMesh(vertices, indices, uv);
         }
         else
         {
-            mf.mesh = null;
+            //mf.sharedMesh = null;
         }
     }    
 
@@ -313,17 +330,14 @@ public class ShapeRenderer : MonoBehaviour
     /// <summary>
     /// Updates the shape stroke geometry.
     /// </summary>
-    public void UpdateStrokeGeometry(Vector2[] vertices)
+    public void UpdateStrokeGeometry(Vector3[] vertices)
     {
         if (stroke)
         {
             lr.loop = true;
             lr.useWorldSpace = false;
             lr.positionCount = vertices.Length;
-            Vector3[] positions = new Vector3[vertices.Length];
-            for (int i = 0; i < vertices.Length; i++)
-                positions[i] = new Vector3(vertices[i].x, vertices[i].y, transform.position.z);
-            lr.SetPositions(positions);
+            lr.SetPositions(vertices);
         }
         else
         {
@@ -397,7 +411,7 @@ public class ShapeRenderer : MonoBehaviour
     /// <summary>
     /// Updates the attached PolygonCollider2D points if updateCollider is true. If no PC2D is attached, a new instance is created.
     /// </summary>
-    public void UpdateCollider(Vector2[] vertices)
+    public void UpdateCollider(Vector3[] vertices)
     {
         if (colliderMode == ColliderMode.ToCollider)
         {
@@ -406,14 +420,16 @@ public class ShapeRenderer : MonoBehaviour
             if (setColliderTo == SetColliderTo.Anchors)
                 pc2d.points = shapeAnchors;
             if (setColliderTo == SetColliderTo.Vertices)
-                pc2d.points = vertices;
+            {                
+                pc2d.points = System.Array.ConvertAll<Vector3, Vector2>(vertices, Vector3toVector2);
+            }
         }
         else if (colliderMode == ColliderMode.FromCollider)
         {
             if (pc2d == null)
             {
                 pc2d = gameObject.AddComponent<PolygonCollider2D>() as PolygonCollider2D;
-                pc2d.points = vertices;
+                pc2d.points = System.Array.ConvertAll<Vector3, Vector2>(vertices, Vector3toVector2);
             }
             else
             {
@@ -430,15 +446,18 @@ public class ShapeRenderer : MonoBehaviour
     // PUBLIC STATIC FUNCTIONS
     //-------------------------------------------------------------------------
 
-    public static Mesh GenerateMesh(Vector3[] vertices, int[] indices, Vector2[] uv)
+    public static Vector2 Vector3toVector2(Vector3 V3)
     {
-        // Future Evan: despite creating a new mesh, this is faster than modifying mf.mesh
-        Mesh newMesh = new Mesh(); 
-        newMesh.Clear();
-        newMesh.vertices = vertices;
-        newMesh.triangles = indices;
-        newMesh.uv = uv;
-        return newMesh;
+        return new Vector2(V3.x, V3.y);
+    }
+
+    public void GenerateMesh(Vector3[] vertices, int[] indices, Vector2[] uv)
+    {
+        Mesh mesh = mf.sharedMesh;
+        mesh.Clear();
+        mesh.vertices = vertices;
+        mesh.triangles = indices;
+        mesh.uv = uv;
     }
 
 
