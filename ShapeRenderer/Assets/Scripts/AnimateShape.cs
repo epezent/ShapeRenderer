@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class AnimateShape : MonoBehaviour {
 
-    ShapeRenderer sr;
     PolygonShape polygonShape;
     public float size;
     public float radius;
@@ -14,7 +13,6 @@ public class AnimateShape : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        sr = GetComponent<ShapeRenderer>();
         polygonShape = GetComponent<PolygonShape>();
 	}
 	
