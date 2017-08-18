@@ -240,6 +240,7 @@ public class ShapeRenderer : MonoBehaviour
     public void UpdateShapeGeometry()
     {
         ValidateVertices();
+        //Vector2[] vertices = GenerateVertices(shapeAnchors, shapeRadii, radiiSmoothness);
         Vector2[] vertices = GenerateVertices(shapeAnchors, shapeRadii, radiiSmoothness);
         if (vertices != null)
         {
@@ -431,7 +432,7 @@ public class ShapeRenderer : MonoBehaviour
             }
             int indicesSize = (size - 2) * 3;
             triangles = new int[indicesSize];
-            TriangulatorDLL.TriagulateDll(verticesX, verticesY, size, triangles, indicesSize);
+            ShapeRendererDLL.Triangulate(verticesX, verticesY, size, triangles, indicesSize);
         }
         else
         {
@@ -446,6 +447,60 @@ public class ShapeRenderer : MonoBehaviour
 
         return newMesh;
     }
+
+
+    public static Vector2[] GenerateVertices(Vector2[] anchors, float[] radii, int[] N)
+    {
+        int vertsSize = 0;
+        for (int i = 0; i < anchors.Length; i++)
+        {
+            if (N[i] == 0 || N[i] == 1 || radii[i] <= 0.0)
+                vertsSize += 1;
+            else
+                vertsSize += N[i];
+        }
+        float[] verticesX = new float[vertsSize];
+        float[] verticesY = new float[vertsSize];
+
+        float[] anchorsX = new float[anchors.Length];
+        float[] anchorsY = new float[anchors.Length];
+
+        for (int i = 0; i < anchors.Length; ++i)
+        {
+            anchorsX[i] = anchors[i].x;
+            anchorsY[i] = anchors[i].y;
+        }
+        ShapeRendererDLL.GenerateVertices(anchorsX, anchorsY, radii, N, anchors.Length, verticesX, verticesY, vertsSize);
+        Vector2[] vertices = new Vector2[vertsSize];
+        for (int i = 0; i < vertsSize; i++)
+        {
+            vertices[i] = new Vector2(verticesX[i], verticesY[i]);
+        }
+        return vertices;        
+    }
+
+    public static Vector2 RotateVector2(Vector2 vector, float degrees)
+    {
+        float sin = Mathf.Sin(degrees * Mathf.Deg2Rad);
+        float cos = Mathf.Cos(degrees * Mathf.Deg2Rad);
+
+        float tx = vector.x;
+        float ty = vector.y;
+        vector.x = (cos * tx) - (sin * ty);
+        vector.y = (sin * tx) + (cos * ty);
+        return vector;
+    }
+
+    public static Vector2[] RotateVertices(Vector2[] vertices, float degrees)
+    {
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            vertices[i] = RotateVector2(vertices[i], degrees);
+        }
+        return vertices;
+    }
+
+    /*
 
     /// <summary>
     /// Rounds array of anchors with corresponding array of radii and array of number
@@ -619,25 +674,6 @@ public class ShapeRenderer : MonoBehaviour
         return angle;
     }
 
-    public static Vector2 RotateVector2(Vector2 vector, float degrees)
-    {
-        float sin = Mathf.Sin(degrees * Mathf.Deg2Rad);
-        float cos = Mathf.Cos(degrees * Mathf.Deg2Rad);
-
-        float tx = vector.x;
-        float ty = vector.y;
-        vector.x = (cos * tx) - (sin * ty);
-        vector.y = (sin * tx) + (cos * ty);
-        return vector;
-    }
-
-    public static Vector2[] RotateVertices(Vector2[] vertices, float degrees)
-    {
-        for (int i = 0; i < vertices.Length; i++)
-        {
-            vertices[i] = RotateVector2(vertices[i], degrees);
-        }
-        return vertices;
-    }
+*/
 
 }
