@@ -57,14 +57,11 @@ public class ShapeRenderer : MonoBehaviour
     public SetColliderTo setColliderTo = SetColliderTo.Anchors;
     [Tooltip("Shows/hides the LineRenderer, MeshFilter, and MeshRenderer required by this ShapeRenderer. Hidden by default to reduce clutter.")]
     public bool showComponents = false;
-    [Tooltip("Uses Triangulator.dll if true, Triangulator.cs if false.")]
-    public bool useDLL = true;
 
     private Material fillMaterial;
     private Material strokeMaterial;
 
     private int defaultSmoothness = 50;
-
 
     private LineRenderer lr;
     private MeshFilter mf;
@@ -107,8 +104,8 @@ public class ShapeRenderer : MonoBehaviour
     public void OnValidate()
     {
         ValidateComponents();
-        ValidateRanges();
         ValidateVertices();
+        ValidateRanges();
     }
 
     private void OnEnable()
@@ -129,6 +126,15 @@ public class ShapeRenderer : MonoBehaviour
         PrefabUtility.DisconnectPrefabInstance(gameObject); // to allow for generic shape prefab templates
         #endif
         UpdateShapeAll();
+    }
+
+    void Update()
+    {
+        #if UNITY_EDITOR
+        ShowComponenets();
+        if (!EditorApplication.isPlaying)
+            UpdateShapeAll(); // we don't want to call this every frame when the game is playing in the editor
+        #endif
     }
 
     private void ValidateComponents()
@@ -175,15 +181,13 @@ public class ShapeRenderer : MonoBehaviour
             Array.Resize(ref shapeRadii, 3);
         if (radiiSmoothness.Length < 3)
             Array.Resize(ref radiiSmoothness, 3);
-    }
-
-    void Update()
-    {
-        #if UNITY_EDITOR
-        ShowComponenets();
-        if (!EditorApplication.isPlaying)
-            UpdateShapeAll(); // we don't want to call this every frame when the game is playing in the editor
-        #endif
+        for (int i = 0; i < shapeAnchors.Length; i++)
+        {
+            if (shapeRadii[i] < 0.0f)
+                shapeRadii[i] = 0.0f;
+            if (radiiSmoothness[i] < 1)
+                radiiSmoothness[i] = 1;
+        }
     }
 
     /// <summary>
@@ -240,24 +244,63 @@ public class ShapeRenderer : MonoBehaviour
     public void UpdateShapeGeometry()
     {
         ValidateVertices();
-        //Vector2[] vertices = GenerateVertices(shapeAnchors, shapeRadii, radiiSmoothness);
-        Vector2[] vertices = GenerateVertices(shapeAnchors, shapeRadii, radiiSmoothness);
-        if (vertices != null)
+        ValidateRanges();
+
+        // calculate sizes
+        int anchorsSize = shapeAnchors.Length;
+        int verticesSize = 0;
+        for (int i = 0; i < anchorsSize; i++)
         {
-            UpdateFillGeometry(vertices);
-            UpdateStrokeGeometry(vertices);
-            UpdateCollider(vertices);
+            if (radiiSmoothness[i] == 0 || radiiSmoothness[i] == 1 || shapeRadii[i] <= 0.0)
+                verticesSize += 1;
+            else
+                verticesSize += radiiSmoothness[i];
+        }
+        int indicesSize = (verticesSize - 2) * 3;
+
+        // unpack Unity types containers
+        float[] anchorsX = new float[shapeAnchors.Length];
+        float[] anchorsY = new float[shapeAnchors.Length];
+        for (int i = 0; i < anchorsSize; ++i)
+        {
+            anchorsX[i] = shapeAnchors[i].x;
+            anchorsY[i] = shapeAnchors[i].y;
+        }
+        float[] verticesX = new float[verticesSize];
+        float[] verticesY = new float[verticesSize];
+        float[] u = new float[verticesSize];
+        float[] v = new float[verticesSize];
+        int[] indices = new int[indicesSize];
+
+        // call DLL
+        if (ShapeRendererDLL.ComputeShape(anchorsX, anchorsY, shapeRadii, radiiSmoothness, anchorsSize, verticesX, verticesY, verticesSize, indices, indicesSize, u, v) == 1)
+        {
+            // repack Unity types
+            Vector2[] vertices2 = new Vector2[verticesSize];
+            Vector3[] vertices3 = new Vector3[verticesSize];
+            Vector2[] uv = new Vector2[verticesSize];
+
+            for (int i = 0; i < verticesSize; i++)
+            {
+                vertices2[i] = new Vector2(verticesX[i], verticesY[i]);
+                vertices3[i] = new Vector3(verticesX[i], verticesY[i], 0);
+                uv[i] = new Vector2(u[i], v[i]);
+            }
+
+            UpdateFillGeometry(vertices3, indices, uv);
+            UpdateStrokeGeometry(vertices2);
+            UpdateCollider(vertices2);
         }
     }
 
     /// <summary>
     /// Updates the shape fill geometry.
     /// </summary>
-    public void UpdateFillGeometry(Vector2[] vertices)
+    public void UpdateFillGeometry(Vector3[] vertices, int[] indices, Vector2[] uv)
     {
         if (fill)
         {
-            mf.mesh = GenerateMesh(vertices, useDLL);
+            mf.mesh = GenerateMesh(vertices, indices, uv);
         }
         else
         {
@@ -265,37 +308,7 @@ public class ShapeRenderer : MonoBehaviour
         }
     }    
 
-    /// <summary>
-    /// Updates the attached PolygonCollider2D points if updateCollider is true. If no PC2D is attached, a new instance is created.
-    /// </summary>
-    public void UpdateCollider(Vector2[] vertices)
-    {
-        if (colliderMode == ColliderMode.ToCollider)
-        {
-            if (pc2d == null)
-                pc2d = gameObject.AddComponent<PolygonCollider2D>() as PolygonCollider2D;
-            if (setColliderTo == SetColliderTo.Anchors)
-                pc2d.points = shapeAnchors;
-            if (setColliderTo == SetColliderTo.Vertices)
-                pc2d.points = vertices;
-        } 
-        else if (colliderMode == ColliderMode.FromCollider)
-        {
-            if (pc2d == null)
-            {
-                pc2d = gameObject.AddComponent<PolygonCollider2D>() as PolygonCollider2D;
-                pc2d.points = vertices;
-            }
-            else
-            {
-                shapeAnchors = pc2d.points;
-                for (int i = 0; i < pc2d.points.Length; i++)
-                {
-                    shapeAnchors[i] += pc2d.offset;
-                }
-            }
-        }
-    }
+   
 
     /// <summary>
     /// Updates the shape stroke geometry.
@@ -381,103 +394,53 @@ public class ShapeRenderer : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Updates the attached PolygonCollider2D points if updateCollider is true. If no PC2D is attached, a new instance is created.
+    /// </summary>
+    public void UpdateCollider(Vector2[] vertices)
+    {
+        if (colliderMode == ColliderMode.ToCollider)
+        {
+            if (pc2d == null)
+                pc2d = gameObject.AddComponent<PolygonCollider2D>() as PolygonCollider2D;
+            if (setColliderTo == SetColliderTo.Anchors)
+                pc2d.points = shapeAnchors;
+            if (setColliderTo == SetColliderTo.Vertices)
+                pc2d.points = vertices;
+        }
+        else if (colliderMode == ColliderMode.FromCollider)
+        {
+            if (pc2d == null)
+            {
+                pc2d = gameObject.AddComponent<PolygonCollider2D>() as PolygonCollider2D;
+                pc2d.points = vertices;
+            }
+            else
+            {
+                shapeAnchors = pc2d.points;
+                for (int i = 0; i < pc2d.points.Length; i++)
+                {
+                    shapeAnchors[i] += pc2d.offset;
+                }
+            }
+        }
+    }
+
     //-------------------------------------------------------------------------
     // PUBLIC STATIC FUNCTIONS
     //-------------------------------------------------------------------------
 
-    /// <summary>
-    /// Generates a 2D shape mesh given array of 2D verticies.
-    /// </summary>
-    public static Mesh GenerateMesh(Vector2[] vertices, bool useDLL)
+    public static Mesh GenerateMesh(Vector3[] vertices, int[] indices, Vector2[] uv)
     {
-        Mesh newMesh = new Mesh();
-        int nPoints = vertices.Length;
-        Vector3[] points = new Vector3[nPoints];
-        Vector2[] uv = new Vector2[nPoints];
-        float minX = Mathf.Infinity;
-        float maxX = Mathf.NegativeInfinity;
-        float minY = Mathf.Infinity;
-        float maxY = Mathf.NegativeInfinity;
-        for (int i = 0; i < nPoints; i++)
-        {
-            Vector2 actual = vertices[i];
-            minX = Mathf.Min(minX, actual.x);
-            maxX = Mathf.Max(maxX, actual.x);
-            minY = Mathf.Min(minY, actual.y);
-            maxY = Mathf.Max(maxY, actual.y);
-            points[i] = new Vector3(actual.x, actual.y, 0);
-
-        }
-        float denX = 1.0f / (maxX - minX);
-        float denY = 1.0f / (maxY - minY);
-        for (int i = 0; i < nPoints; i++)
-        {
-            Vector2 actual = vertices[i];
-            float u = (actual.x - minX) * denX;
-            float v = (actual.y - minY) * denY;
-            uv[i] = new Vector2(u, v);
-        }
-
-        int[] triangles;
-
-        if (useDLL)
-        {
-            int size = vertices.Length;
-            float[] verticesX = new float[size];
-            float[] verticesY = new float[size];
-            for (int i = 0; i < size; ++i)
-            {
-                verticesX[i] = vertices[i].x;
-                verticesY[i] = vertices[i].y;
-            }
-            int indicesSize = (size - 2) * 3;
-            triangles = new int[indicesSize];
-            ShapeRendererDLL.Triangulate(verticesX, verticesY, size, triangles, indicesSize);
-        }
-        else
-        {
-            Triangulator tr = new Triangulator(vertices);
-            triangles = tr.Triangulate();
-        }
-
+        // Future Evan: despite creating a new mesh, this is faster than modifying mf.mesh
+        Mesh newMesh = new Mesh(); 
         newMesh.Clear();
-        newMesh.vertices = points;
-        newMesh.triangles = triangles;
+        newMesh.vertices = vertices;
+        newMesh.triangles = indices;
         newMesh.uv = uv;
-
         return newMesh;
     }
 
-
-    public static Vector2[] GenerateVertices(Vector2[] anchors, float[] radii, int[] N)
-    {
-        int vertsSize = 0;
-        for (int i = 0; i < anchors.Length; i++)
-        {
-            if (N[i] == 0 || N[i] == 1 || radii[i] <= 0.0)
-                vertsSize += 1;
-            else
-                vertsSize += N[i];
-        }
-        float[] verticesX = new float[vertsSize];
-        float[] verticesY = new float[vertsSize];
-
-        float[] anchorsX = new float[anchors.Length];
-        float[] anchorsY = new float[anchors.Length];
-
-        for (int i = 0; i < anchors.Length; ++i)
-        {
-            anchorsX[i] = anchors[i].x;
-            anchorsY[i] = anchors[i].y;
-        }
-        ShapeRendererDLL.GenerateVertices(anchorsX, anchorsY, radii, N, anchors.Length, verticesX, verticesY, vertsSize);
-        Vector2[] vertices = new Vector2[vertsSize];
-        for (int i = 0; i < vertsSize; i++)
-        {
-            vertices[i] = new Vector2(verticesX[i], verticesY[i]);
-        }
-        return vertices;        
-    }
 
     public static Vector2 RotateVector2(Vector2 vector, float degrees)
     {
@@ -499,181 +462,5 @@ public class ShapeRenderer : MonoBehaviour
         }
         return vertices;
     }
-
-    /*
-
-    /// <summary>
-    /// Rounds array of anchors with corresponding array of radii and array of number
-    /// of interpolated vertices N. Paramters anchors, radii, and N must be the same length.
-    /// </summary>
-    public static Vector2[] GenerateVertices(Vector2[] anchors, float[] radii, int[] N)
-    {
-        if (anchors.Length != radii.Length || anchors.Length != N.Length || radii.Length != N.Length)
-            return null;
-
-        List<Vector2> newVerticesList = new List<Vector2>();
-        for (int i = 0; i < anchors.Length; i++)
-        {
-            if (radii[i] > 0.0f && N[i] > 1)
-            {
-                Vector2 a, b, c;
-                if (i == 0)
-                {
-                    a = anchors[anchors.Length - 1];
-                    b = anchors[i];
-                    c = anchors[i + 1];
-                }
-                else if (i == anchors.Length - 1)
-                {
-                    a = anchors[i - 1];
-                    b = anchors[i];
-                    c = anchors[0];
-                }
-                else
-                {
-                    a = anchors[i - 1];
-                    b = anchors[i];
-                    c = anchors[i + 1];
-                }
-                newVerticesList.AddRange(RoundCorner(a, b, c, radii[i], N[i]));
-            }
-            else
-                newVerticesList.Add(anchors[i]);
-        }
-        return newVerticesList.ToArray();
-    }
-
-    /// <summary>
-    /// Rounds anchor b with radius r and number of interpolated vertices n given consecutive anchors a, b, and c.
-    /// </summary>
-    public static Vector2[] RoundCorner(Vector2 a, Vector2 b, Vector2 c, float r, int n)
-    {
-        // Find directional vectors of line segments
-        Vector2 v1 = b - a;
-        Vector2 v2 = b - c;
-
-        // Check if corner radius is longer than vectors
-        if (r >= v1.magnitude || r >= v2.magnitude)
-        {
-            print("Radius is larger than the side lengths.");
-            return new Vector2[] { b };
-        }
-
-        // Find unit vectors
-        Vector2 u1 = v1 / v1.magnitude;
-        Vector2 u2 = v2 / v2.magnitude;
-
-        // Find normal vectors
-        Vector2 n1, n2;
-        n1.x = -u1.y; n1.y = u1.x;
-        n2.x = -u2.y; n2.y = u2.x;
-
-        // Check/fix direction of normal vector
-        if (Vector2.Dot(n1, -v2) < 0)
-            n1 = -n1;
-        if (Vector2.Dot(n2, -v1) < 0)
-            n2 = -n2;
-
-        // Find end-points of offset lines
-        Vector2 o11 = a + r * n1;
-        Vector2 o10 = b + r * n1;
-        Vector2 o22 = c + r * n2;
-        Vector2 o20 = b + r * n2;
-
-        // Find intersection point of offset lines
-        Vector2 x = FindIntersection(o11, o10, o22, o20);
-
-        // Find tangent points
-        Vector2 t1 = x + r * -n1;
-        Vector2 t2 = x + r * -n2;
-
-        // Check if tangent points are on line segments
-        //if (!IamondMath.IsPointInsideLine(a,b,t1) || !IamondMath.IsPointInsideLine(c,b,t2))
-        //return new Vector2[] { b };
-
-        float angle1 = Mathf.Atan2(t1.y - x.y, t1.x - x.x);
-        float angle2 = Mathf.Atan2(t2.y - x.y, t2.x - x.x);
-        float[] angles = new float[n];
-
-        if (Mathf.Abs(angle1 - angle2) < Mathf.PI)
-            angles = LinSpace(angle1, angle2, n);
-        else if (Mathf.Abs(angle1 - angle2) > Mathf.PI)
-            angles = LinSpace(WrapTo2Pi(angle1), WrapTo2Pi(angle2), n);
-
-        Vector2[] verts = new Vector2[n];
-        for (int i = 0; i < n; i++)
-        {
-            Vector2 vertex;
-            vertex.x = r * Mathf.Cos(angles[i]) + x.x;
-            vertex.y = r * Mathf.Sin(angles[i]) + x.y;
-            verts[i] = vertex;
-        }
-
-        return verts;
-    }
-
-    public static Vector2 FindIntersection(Vector2 a1, Vector2 a2, Vector2 b1, Vector2 b2)
-    {
-        float x1 = a1.x; float y1 = a1.y;
-        float x2 = a2.x; float y2 = a2.y;
-        float x3 = b1.x; float y3 = b1.y;
-        float x4 = b2.x; float y4 = b2.y;
-
-        Vector2 intersection;
-        intersection.x = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
-        intersection.y = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
-        return intersection;
-    }
-
-    public static bool IsPointInsideLine(Vector2 l1, Vector2 l2, Vector2 p)
-    {
-        // This code can be optimized by creating variables for expressions below
-        float crossproduct = (p.y - l1.y) * (l2.x - l1.x) - (p.x - l1.x) * (l2.y - l1.y);
-        if (Mathf.Abs(crossproduct) > 0.1)
-        {
-            print(Mathf.Abs(crossproduct));
-            print("Cross product is not zero.");
-            return false;
-        }
-
-
-        float dotproduct = (p.x - l1.x) * (l2.x - l1.x) + (p.y - l1.y) * (l2.y - l1.y);
-        if (dotproduct < 0.0f)
-        {
-            print("Dot product is not less than zero.");
-            return false;
-        }
-
-        float squarelength = (l2.x - l1.x) * (l2.x - l1.x) + (l2.y - l1.y) * (l2.y - l1.y);
-        if (dotproduct > squarelength)
-        {
-            print("Dot product is not greater than square length.");
-            return false;
-        }
-
-        return true;
-    }
-
-    public static float[] LinSpace(float a, float b, int n)
-    {
-        float[] linspace = new float[n];
-        float delta = (b - a) / (n - 1);
-
-        linspace[0] = a;
-        for (int i = 1; i < n - 1; i++)
-            linspace[i] = linspace[i - 1] + delta;
-
-        linspace[n - 1] = b;
-        return linspace;
-    }
-
-    public static float WrapTo2Pi(float angle)
-    {
-        if (angle < 0)
-            return angle + 2 * Mathf.PI;
-        return angle;
-    }
-
-*/
 
 }

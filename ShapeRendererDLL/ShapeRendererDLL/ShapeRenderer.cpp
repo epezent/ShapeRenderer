@@ -1,27 +1,28 @@
 #include "ShapeRenderer.h"
 #include <limits>
 #include <cmath>
+#include <algorithm>
 
 //-----------------------------------------------------------------------------
 // DLL EXPORTS
 //-----------------------------------------------------------------------------
 
-int triangulate(float* points_x, float* points_y, int n, int* indices, int indices_size) {
+int triangulate(float* vertices_x, float* vertices_y, int vertices_size, int* indices, int indices_size) {
 
-    if (n < 3)
+    if (vertices_size < 3)
         return -1;
 
-    std::vector<int> V(n, 0);
-    if (area(points_x, points_y, n) > 0) {
-        for (int v = 0; v < n; v++)
+    std::vector<int> V(vertices_size, 0);
+    if (area(vertices_x, vertices_y, vertices_size) > 0) {
+        for (int v = 0; v < vertices_size; v++)
             V[v] = v;
     }
     else {
-        for (int v = 0; v < n; v++)
-            V[v] = (n - 1) - v;
+        for (int v = 0; v < vertices_size; v++)
+            V[v] = (vertices_size - 1) - v;
     }
 
-    int nv = n;
+    int nv = vertices_size;
     int count = 2 * nv;
     int i = 0;
     for (int m = 0, v = nv - 1; nv > 2;)
@@ -40,7 +41,7 @@ int triangulate(float* points_x, float* points_y, int n, int* indices, int indic
         if (nv <= w)
             w = 0;
 
-        if (snip(points_x, points_y, n, u, v, w, nv, V) == 1) {
+        if (snip(vertices_x, vertices_y, vertices_size, u, v, w, nv, V) == 1) {
             int a, b, c, s, t;
             a = V[u];
             b = V[v];
@@ -63,9 +64,18 @@ int triangulate(float* points_x, float* points_y, int n, int* indices, int indic
     return 1;
 }
 
-int render_shape(float* anchors_x, float* anchors_y, float* radii, int* resolutions,
-    float* vertices_x, float* vertices_y, int* triangles, float* u, float* v) {
-    return 0;
+int compute_shape(float* anchors_x, float* anchors_y, float* radii, int* N, int anchors_size,
+    float* vertices_x, float* vertices_y, int vertices_size, int* indices, int indices_size, float* u, float* v) {
+   
+    if (generate_vertices(anchors_x, anchors_y, radii, N, anchors_size, vertices_x, vertices_y, vertices_size) <= 0)
+        return 0;
+
+    if (triangulate(vertices_x, vertices_y, vertices_size, indices, indices_size) <= 0)
+        return 0;
+
+    generate_uvs(vertices_x, vertices_y, vertices_size, u, v);
+
+    return 1;
 }
 
 //-----------------------------------------------------------------------------
@@ -139,7 +149,7 @@ float wrap_to_2_pi(float angle) {
     return angle;
 }
 
-bool inside_line(Vector2 L1, Vector2 L2, Vector2 P)
+bool inside_line(Vector2& L1, Vector2& L2, Vector2& P)
 {
     float crossproduct = (P.y - L1.y) * (L2.x - L1.x) - (P.x - L1.x) * (L2.y - L1.y);
     if (std::abs(crossproduct) > 0.1)
@@ -261,4 +271,38 @@ int generate_vertices(float* anchors_x, float* anchors_y, float* radii, int* N, 
     }
 
     return 1;
+}
+
+void generate_uvs(float* vertices_x, float* vertices_y, int vertices_size, float* u, float* v) {
+    float minX = std::numeric_limits<float>::infinity();
+    float maxX = -std::numeric_limits<float>::infinity();
+    float minY = std::numeric_limits<float>::infinity();
+    float maxY = -std::numeric_limits<float>::infinity();
+    for (int i = 0; i < vertices_size; i++) {
+        minX = std::min(minX, vertices_x[i]);
+        maxX = std::max(maxX, vertices_x[i]);
+        minY = std::min(minY, vertices_y[i]);
+        maxY = std::max(maxY, vertices_y[i]);
+
+    }
+    float denX = 1.0f / (maxX - minX);
+    float denY = 1.0f / (maxY - minY);
+    for (int i = 0; i <  vertices_size; i++) {
+        u[i] = (vertices_x[i] - minX) * denX; 
+        v[i] = (vertices_y[i] - minY) * denY;
+    }
+}
+
+void pack_vector2(float* X, float* Y, std::vector<Vector2>& V) {
+    for (int i = 0; i < V.size(); i++) {
+        V[i].x = X[i];
+        V[i].y = Y[i];
+    }
+}
+
+void unpack_vector2(std::vector<Vector2>& V, float* X, float* Y) {
+    for (int i = 0; i < V.size(); i++) {
+        X[i] = V[i].x;
+        Y[i] = V[i].y;
+    }
 }

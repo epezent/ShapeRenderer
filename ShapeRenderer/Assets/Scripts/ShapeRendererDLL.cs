@@ -10,9 +10,14 @@ public class ShapeRendererDLL {
     //-------------------------------------------------------------------------
 
     [DllImport("ShapeRenderer", EntryPoint = "triangulate", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    public static extern int Triangulate(float[] pointsX, float[] pointsY, int size, int[] indices, int indices_size);
+    public static extern int Triangulate(float[] verticesX, float[] verticesY, int verticesSize, int[] indices, int indicesSize);
 
     [DllImport("ShapeRenderer", EntryPoint = "generate_vertices", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    public static extern int GenerateVertices(float[] anchors_x, float[] anchors_y, float[] radii, int[] N, int anchors_size, float[] vertices_x, float[] vertices_y, int vertices_size);
+    public static extern int GenerateVertices(float[] anchorsX, float[] anchorsY, float[] radii, int[] N, int anchorsSize, float[] verticesX, float[] verticesY, int verticesSize);
+
+    [DllImport("ShapeRenderer", EntryPoint = "compute_shape", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ComputeShape(float[] anchorsX, float[] anchorsY, float[] radii, int[] N, int anchorsSize, 
+                                         float[] verticesX, float[] verticesY, int verticesSize, 
+                                         int[] indices, int indicesSize, float[] u, float[] v);
 }
 

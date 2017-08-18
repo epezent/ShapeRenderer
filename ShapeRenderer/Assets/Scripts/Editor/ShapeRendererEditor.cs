@@ -31,7 +31,6 @@ public class ShapeRendererEditor : Editor {
     SerializedProperty colliderMode;
     SerializedProperty setColliderTo;
     SerializedProperty showComponents;
-    SerializedProperty useDLL;
 
     private void OnEnable()
     {
@@ -53,7 +52,6 @@ public class ShapeRendererEditor : Editor {
         colliderMode = serializedObject.FindProperty("colliderMode");
         setColliderTo = serializedObject.FindProperty("setColliderTo");
         showComponents = serializedObject.FindProperty("showComponents");
-        useDLL = serializedObject.FindProperty("useDLL");
     }
 
     public override void OnInspectorGUI()
@@ -107,10 +105,9 @@ public class ShapeRendererEditor : Editor {
         if ((ShapeRenderer.ColliderMode)colliderMode.enumValueIndex == ShapeRenderer.ColliderMode.ToCollider)
             EditorGUILayout.PropertyField(setColliderTo);
         EditorGUILayout.PropertyField(showComponents);
-        EditorGUILayout.PropertyField(useDLL);
 
         if (EditorGUI.EndChangeCheck())
             serializedObject.ApplyModifiedProperties();
-    }
+    }          
 
 }
