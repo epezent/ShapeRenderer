@@ -75,7 +75,7 @@ public class ShapeRenderer : MonoBehaviour
         // Add required Unity components
         ValidateComponents();
         ValidateRanges();
-        ValidateVertices();
+        ValidateAnchors();
 
         // Check for a PolgonCollider2D
         pc2d = GetComponent<PolygonCollider2D>();
@@ -106,7 +106,7 @@ public class ShapeRenderer : MonoBehaviour
     public void OnValidate()
     {
         ValidateComponents();
-        ValidateVertices();
+        ValidateAnchors();
         ValidateRanges();
     }
 
@@ -161,7 +161,7 @@ public class ShapeRenderer : MonoBehaviour
             mpb = new MaterialPropertyBlock();
     }
 
-    private void ValidateVertices()
+    private void ValidateAnchors()
     {
         if (shapeRadii.Length != shapeAnchors.Length)
             Array.Resize(ref shapeRadii, shapeAnchors.Length);
@@ -233,14 +233,13 @@ public class ShapeRenderer : MonoBehaviour
     // DLL IMPORTS
     //-------------------------------------------------------------------------
 
-    [DllImport("ShapeRenderer", EntryPoint = "triangulate", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int Triangulate(float[] verticesX, float[] verticesY, int verticesSize, int[] indices, int indicesSize);
+    [DllImport("ShapeRenderer", EntryPoint = "compute_shape1")]
+    private static extern int ComputeShape1(float[] anchorsX, float[] anchorsY, float[] radii, int[] N, int anchorsSize,
+                                         float[] verticesX, float[] verticesY, int verticesSize,
+                                         int[] indices, int indicesSize, float[] u, float[] v);
 
-    [DllImport("ShapeRenderer", EntryPoint = "generate_vertices", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int GenerateVertices(float[] anchorsX, float[] anchorsY, float[] radii, int[] N, int anchorsSize, float[] verticesX, float[] verticesY, int verticesSize);
-
-    [DllImport("ShapeRenderer", EntryPoint = "compute_shape", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int ComputeShape(float[] anchorsX, float[] anchorsY, float[] radii, int[] N, int anchorsSize,
+    [DllImport("ShapeRenderer", EntryPoint = "compute_shape2")]
+    private static extern int ComputeShape2(float[] anchorsX, float[] anchorsY, float[] radii, int[] N, int anchorsSize,
                                          float[] verticesX, float[] verticesY, int verticesSize,
                                          int[] indices, int indicesSize, float[] u, float[] v);
 
@@ -263,7 +262,7 @@ public class ShapeRenderer : MonoBehaviour
     /// </summary>
     public void UpdateShapeGeometry()
     {
-        ValidateVertices();
+        ValidateAnchors();
         ValidateRanges();
 
         // calculate sizes
@@ -293,7 +292,14 @@ public class ShapeRenderer : MonoBehaviour
         int[] indices = new int[indicesSize];
 
         // call DLL
-        if (ComputeShape(anchorsX, anchorsY, shapeRadii, radiiSmoothness, anchorsSize, verticesX, verticesY, verticesSize, indices, indicesSize, u, v) == 1)
+        int result = 0;
+        if (showComponents)
+            result = ComputeShape1(anchorsX, anchorsY, shapeRadii, radiiSmoothness, anchorsSize, verticesX, verticesY, verticesSize, indices, indicesSize, u, v);
+        else
+            result = ComputeShape2(anchorsX, anchorsY, shapeRadii, radiiSmoothness, anchorsSize, verticesX, verticesY, verticesSize, indices, indicesSize, u, v);
+
+
+        if (result == 1)
         {
             // repack Unity types
             Vector3[] vertices = new Vector3[verticesSize];

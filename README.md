@@ -38,3 +38,10 @@ This project was born out of my frustration with having to constantly reopen Pho
 
 ## Known Issues/Quirks
 
+## Comming Soon
+
+- Multicolor Linear Gradient Fill
+- Rotation / Scaling
+- stroke solid color
+- Textures
+
