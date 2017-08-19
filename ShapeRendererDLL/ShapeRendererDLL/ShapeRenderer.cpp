@@ -165,7 +165,7 @@ int triangulate(float* vertices_x, float* vertices_y, int vertices_size, int* in
         if (nv <= w)
             w = 0;
 
-        if (snip(vertices_x, vertices_y, vertices_size, u, v, w, nv, V) == 1) {
+        if (snip(vertices_x, vertices_y, vertices_size, u, v, w, nv, V)) {
             int a, b, c, s, t;
             a = V[u];
             b = V[v];
@@ -224,7 +224,7 @@ bool triangulate(const std::vector<Vector2>& vertices, std::vector<int>& indices
         if (nv <= w)
             w = 0;
 
-        if (snip(vertices, u, v, w, nv, V) == 1) {
+        if (snip(vertices, u, v, w, nv, V)) {
             int a, b, c, s, t;
             a = V[u];
             b = V[v];
@@ -247,62 +247,27 @@ bool triangulate(const std::vector<Vector2>& vertices, std::vector<int>& indices
     return true;
 }
 
-float poly_area1(float* points_x, float* points_y, int size) {
-    float area = 0.0f;
-    for (int p = size - 1, q = 0; q < size; p = q++) {
-        area += points_x[p] * points_y[q] - points_x[q] * points_y[p];
-    }
-    return 0.5f * area;
-}
-
-float poly_area1(const std::vector<Vector2>& vertices) {
-float area = 0.0f;
-    for (int p = vertices.size() - 1, q = 0; q < vertices.size(); p = q++) {
-        area += vertices[p].x * vertices[q].y - vertices[q].x * vertices[p].y;
-    }
-    return 0.5f * area;
-}
-
-float poly_area2(float* points_x, float* points_y, int size) {
-    float area = 0.0f;
-    for (size_t i = 1; i < size - 1; ++i)
-        area += points_x[i] * (points_y[i + 1] - points_y[i - 1]);
-    area += points_x[size - 1] * (points_y[0] - points_y[size - 2]);
-    area += points_x[0] * (points_y[1] - points_y[size - 1]);
-    return  area * 0.5f;
-}
-
-float poly_area2(const std::vector<Vector2>& vertices) {
-    float area = 0.0f;
-    size_t size = vertices.size();
-    for (size_t i = 1; i < size - 1; ++i)
-        area += vertices[i].x * (vertices[i + 1].y - vertices[i - 1].y);
-    area += vertices[size - 1].x * (vertices[0].y - vertices[size - 2].y);
-    area += vertices[0].x * (vertices[1].y - vertices[size - 1].y);
-    return  area * 0.5f;
-}
-
-
-int snip(float* points_x, float* points_y, int size, int u, int v, int w, int n, std::vector<int>& V) {
+bool snip(float* points_x, float* points_y, int size, int u, int v, int w, int n, std::vector<int>& V) {
     int p;
 
     Vector2 A(points_x[V[u]], points_y[V[u]]);
     Vector2 B(points_x[V[v]], points_y[V[v]]);
     Vector2 C(points_x[V[w]], points_y[V[w]]);
+    Vector2 P;
 
     if (FLT_EPSILON > (((B.x - A.x) * (C.y - A.y)) - ((B.y - A.y) * (C.x - A.x)))) {
-        return 0;
+        return false;
     }
     for (p = 0; p < n; p++) {
         if ((p == u) || (p == v) || (p == w)) {
             continue;
         }
-        Vector2 P(points_x[V[p]], points_y[V[p]]);
-        if (inside_triangle2(A, B, C, P) == 1) {
-            return 0;
+        P.x = points_x[V[p]]; P.y = points_y[V[p]];
+        if (inside_triangle2(A, B, C, P)) {
+            return false;
         }
     }
-    return 1;
+    return true;
 }
 
 bool snip(const std::vector<Vector2>& vertices, int u, int v, int w, int n, std::vector<int>& V) {
@@ -434,6 +399,41 @@ bool round_corner(Vector2& A, Vector2& B, Vector2& C, float r, std::vector<Vecto
 //-----------------------------------------------------------------------------
 // GEOMETRIC FUNCTIONS
 //-----------------------------------------------------------------------------
+
+float poly_area1(float* points_x, float* points_y, int size) {
+    float area = 0.0f;
+    for (int p = size - 1, q = 0; q < size; p = q++) {
+        area += points_x[p] * points_y[q] - points_x[q] * points_y[p];
+    }
+    return 0.5f * area;
+}
+
+float poly_area1(const std::vector<Vector2>& vertices) {
+    float area = 0.0f;
+    for (int p = vertices.size() - 1, q = 0; q < vertices.size(); p = q++) {
+        area += vertices[p].x * vertices[q].y - vertices[q].x * vertices[p].y;
+    }
+    return 0.5f * area;
+}
+
+float poly_area2(float* points_x, float* points_y, int size) {
+    float area = 0.0f;
+    for (size_t i = 1; i < size - 1; ++i)
+        area += points_x[i] * (points_y[i + 1] - points_y[i - 1]);
+    area += points_x[size - 1] * (points_y[0] - points_y[size - 2]);
+    area += points_x[0] * (points_y[1] - points_y[size - 1]);
+    return  area * 0.5f;
+}
+
+float poly_area2(const std::vector<Vector2>& vertices) {
+    float area = 0.0f;
+    int size = vertices.size();
+    for (int i = 1; i < size - 1; ++i)
+        area += vertices[i].x * (vertices[i + 1].y - vertices[i - 1].y);
+    area += vertices[size - 1].x * (vertices[0].y - vertices[size - 2].y);
+    area += vertices[0].x * (vertices[1].y - vertices[size - 1].y);
+    return  area * 0.5f;
+}
 
 bool inside_triangle1(const Vector2& A, const Vector2& B, const Vector2& C, const Vector2& P) {
     return ((((C.x - B.x) * (P.y - B.y) - (C.y - B.y) * (P.x - B.x)) >= 0.0f) &&

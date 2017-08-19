@@ -5,7 +5,7 @@
 #ifdef SHAPERENDERERDLL_EXPORTS
 #	define SHAPERENDERER_API __declspec(dllexport)
 #else
-#	define TRIANGULATOR_API __declspec(dllimport)
+#	define SHAPERENDERER_API __declspec(dllimport)
 #endif
 
 //-----------------------------------------------------------------------------
@@ -18,6 +18,7 @@ float PI = 3.1415927410125732421875;
 // DLL EXPORTS
 //-----------------------------------------------------------------------------
 
+
 extern "C" {
     SHAPERENDERER_API int compute_shape1(float* anchors_x, float* anchors_y, float* radii, int* N, int anchors_size,
         float* vertices_x, float* vertices_y, int vertices_size, int* indices, int indices_size, float* u, float* v);
@@ -27,6 +28,7 @@ extern "C" {
     SHAPERENDERER_API int compute_shape2(float* anchors_x, float* anchors_y, float* radii, int* N, int anchors_size,
         float* vertices_x, float* vertices_y, int vertices_size, int* indices, int indices_size, float* u, float* v);
 }
+
 
 //-----------------------------------------------------------------------------
 // CORE FUNCTIONS
@@ -38,7 +40,7 @@ bool generate_vertices(const std::vector<Vector2>& anchors, const std::vector<fl
 int triangulate(float* vertices_x, float* vertices_y, int vertices_size, int* indices, int indices_size);
 bool triangulate(const std::vector<Vector2>& vertices, std::vector<int>& indices_out);
 
-int snip(float* points_x, float* points_y, int size, int u, int v, int w, int n, std::vector<int>& V);
+bool snip(float* points_x, float* points_y, int size, int u, int v, int w, int n, std::vector<int>& V);
 bool snip(const std::vector<Vector2>& vertices, int u, int v, int w, int n, std::vector<int>& V);
 
 void generate_uvs(float* vertices_x, float* vertices_y, int vertices_size, float* u, float* v);
@@ -52,11 +54,12 @@ bool round_corner(Vector2& A, Vector2& B, Vector2& C, float r, std::vector<Vecto
 
 float poly_area1(float* points_x, float* points_y, int size);
 float poly_area1(const std::vector<Vector2>& vertices);
-float poly_area2(float* points_x, float* points_y, int size); // fastest
-float poly_area2(const std::vector<Vector2>& vertices); // fastest
+float poly_area2(float* points_x, float* points_y, int size); 
+float poly_area2(const std::vector<Vector2>& vertices); 
+
 
 bool inside_triangle1(const Vector2& A, const Vector2& B, const Vector2& C, const Vector2& P);
-bool inside_triangle2(const Vector2& A, const Vector2& B, const Vector2& C, const Vector2& P); // fastest
+bool inside_triangle2(const Vector2& A, const Vector2& B, const Vector2& C, const Vector2& P);
 
 Vector2 intersection(const Vector2& A1, const Vector2& A2, const Vector2& B1, const Vector2& B2);
 
