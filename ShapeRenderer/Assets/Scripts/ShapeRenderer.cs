@@ -293,11 +293,7 @@ public class ShapeRenderer : MonoBehaviour
 
         // call DLL
         int result = 0;
-        if (showComponents)
-            result = ComputeShape1(anchorsX, anchorsY, shapeRadii, radiiSmoothness, anchorsSize, verticesX, verticesY, verticesSize, indices, indicesSize, u, v);
-        else
-            result = ComputeShape2(anchorsX, anchorsY, shapeRadii, radiiSmoothness, anchorsSize, verticesX, verticesY, verticesSize, indices, indicesSize, u, v);
-
+        result = ComputeShape1(anchorsX, anchorsY, shapeRadii, radiiSmoothness, anchorsSize, verticesX, verticesY, verticesSize, indices, indicesSize, u, v);
 
         if (result == 1)
         {
