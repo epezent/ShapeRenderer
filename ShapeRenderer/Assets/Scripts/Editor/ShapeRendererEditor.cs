@@ -17,9 +17,9 @@ public class ShapeRendererEditor : Editor {
     SerializedProperty slider1;
     SerializedProperty slider2;
     SerializedProperty fillTexture;
-    //SerializedProperty fillTextrueTiling;
-    //SerializedProperty fillTextureOffset;
-    SerializedProperty fillMaterial;
+    SerializedProperty fillTextrueTiling;
+    SerializedProperty fillTextureOffset;
+    SerializedProperty customFillMaterial;
 
     SerializedProperty stroke;
     SerializedProperty strokeType;
@@ -27,7 +27,7 @@ public class ShapeRendererEditor : Editor {
     SerializedProperty strokeColor;
     SerializedProperty strokeWidth;
     SerializedProperty strokeTexture;
-    SerializedProperty strokeMaterial;
+    SerializedProperty customStrokeMaterial;
 
     SerializedProperty shapeAnchors;
     SerializedProperty shapeRadiil;
@@ -50,17 +50,17 @@ public class ShapeRendererEditor : Editor {
         slider1 = serializedObject.FindProperty("slider1");
         slider2 = serializedObject.FindProperty("slider2");
         fillTexture = serializedObject.FindProperty("fillTexture");
-        //fillTextrueTiling = serializedObject.FindProperty("fillTextrueTiling");
-        //fillTextureOffset = serializedObject.FindProperty("fillTextureOffset");
+        fillTextrueTiling = serializedObject.FindProperty("fillTextrueTiling");
+        fillTextureOffset = serializedObject.FindProperty("fillTextureOffset");
 
-        fillMaterial = serializedObject.FindProperty("fillMaterial");
+        customFillMaterial = serializedObject.FindProperty("customFillMaterial");
         stroke = serializedObject.FindProperty("stroke");
         strokeType = serializedObject.FindProperty("strokeType");
         strokeSolid = serializedObject.FindProperty("strokeSolid");
         strokeColor = serializedObject.FindProperty("strokeColor");
         strokeWidth = serializedObject.FindProperty("strokeWidth");
         strokeTexture = serializedObject.FindProperty("strokeTexture");
-        strokeMaterial = serializedObject.FindProperty("strokeMaterial");
+        customStrokeMaterial = serializedObject.FindProperty("customStrokeMaterial");
 
 
     shapeAnchors = serializedObject.FindProperty("shapeAnchors");
@@ -108,15 +108,15 @@ public class ShapeRendererEditor : Editor {
                 EditorGUILayout.PropertyField(fillTexture, new GUIContent("Texture"));
                 if ((Texture)fillTexture.objectReferenceValue != null)
                 {
-                    //EditorGUILayout.PropertyField(fillTextrueTiling, new GUIContent("Tiling"));
-                    //EditorGUILayout.PropertyField(fillTextureOffset, new GUIContent("Offset"));
+                    EditorGUILayout.PropertyField(fillTextrueTiling, new GUIContent("Tiling"));
+                    EditorGUILayout.PropertyField(fillTextureOffset, new GUIContent("Offset"));
                 }
 
 
             }
             else
             {
-                EditorGUILayout.PropertyField(fillMaterial);
+                EditorGUILayout.PropertyField(customFillMaterial);
             }
         }
 
@@ -136,7 +136,7 @@ public class ShapeRendererEditor : Editor {
             }
             else
             {
-                EditorGUILayout.PropertyField(strokeMaterial);
+                EditorGUILayout.PropertyField(customStrokeMaterial);
             }
             EditorGUILayout.PropertyField(strokeWidth);
 

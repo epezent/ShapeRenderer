@@ -35,10 +35,10 @@ public class ShapeRenderer : MonoBehaviour
     public float slider2 = 0.0f;
     [Tooltip("Texture to be applied to the fill (multiply)")]
     public Texture fillTexture;
-    //public Vector2 fillTextrueTiling = Vector2.one;
-    //public Vector2 fillTextureOffset = Vector2.zero;
+    public Vector2 fillTextrueTiling = Vector2.one;
+    public Vector2 fillTextureOffset = Vector2.zero;
     [Tooltip("Material to be applied to the fill")]
-    public Material fillMaterial;
+    public Material customFillMaterial;
 
     [Tooltip("Enables/disables shape stroke.")]
     public bool stroke = false;
@@ -50,7 +50,7 @@ public class ShapeRenderer : MonoBehaviour
     [Tooltip("The shape stroke width in world units.")]
     public float strokeWidth = 10;
     public Texture strokeTexture;
-    public Material strokeMaterial;
+    public Material customStrokeMaterial;
 
 
     [Tooltip("The shape anchor points in world units, relative to this GameObject's transform.")]
@@ -71,6 +71,10 @@ public class ShapeRenderer : MonoBehaviour
     public SetColliderTo setColliderTo = SetColliderTo.Anchors;
     [Tooltip("Shows/hides the LineRenderer, MeshFilter, and MeshRenderer required by this ShapeRenderer. Hidden by default to reduce clutter.")]
     public bool showComponents = false;
+
+
+    private Material fillMaterial;
+    private Material strokeMaterial;
 
 
     private int defaultSmoothness = 50;
@@ -383,6 +387,7 @@ public class ShapeRenderer : MonoBehaviour
                 if (fillTexture != null)
                 {
                     mpb_fill.SetTexture("_MainTex", fillTexture);
+                    mpb_fill.SetVector("_TileOff", new Vector4(fillTextrueTiling.x, fillTextrueTiling.y, fillTextureOffset.x, fillTextureOffset.y));
                 }
                 else
                     mpb_fill.Clear();
@@ -410,11 +415,14 @@ public class ShapeRenderer : MonoBehaviour
                 mpb_fill.SetFloat("_Slider1", slider1);
                 mpb_fill.SetFloat("_Slider2", slider2);
                 mr.SetPropertyBlock(mpb_fill);
+                mr.sharedMaterial = fillMaterial;
             }
-            
-            mr.sharedMaterial = fillMaterial;
-            //mr.material.SetTextureScale("_MainTex", fillTextrueTiling);
-            //mr.material.SetTextureOffset("_MainTex", fillTextureOffset);
+            else
+            {
+                mpb_fill.Clear();
+                mr.SetPropertyBlock(null);
+                mr.sharedMaterial = customFillMaterial;
+            }
             mr.sortingLayerID = sortingLayer;
             mr.sortingOrder = sortingOrder;
         }
@@ -459,17 +467,20 @@ public class ShapeRenderer : MonoBehaviour
                 {
                     lr.colorGradient = strokeColor;
                 }
-
-                lr.startWidth = strokeWidth;
-                lr.endWidth = strokeWidth;
-
                 lr.SetPropertyBlock(mpb_stroke);
                 strokeMaterial = Resources.Load("SR_Stroke") as Material;
                 lr.sharedMaterial = strokeMaterial;
-
-                lr.sortingLayerID = sortingLayer;
-                lr.sortingOrder = sortingOrder + 1;
             }
+            else
+            {
+                mpb_stroke.Clear();
+                lr.SetPropertyBlock(null);
+                lr.sharedMaterial = customStrokeMaterial;
+            }
+            lr.startWidth = strokeWidth;
+            lr.endWidth = strokeWidth;
+            lr.sortingLayerID = sortingLayer;
+            lr.sortingOrder = sortingOrder + 1;
         }
     }
 

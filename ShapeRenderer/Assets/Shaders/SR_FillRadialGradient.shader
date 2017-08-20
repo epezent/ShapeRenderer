@@ -12,6 +12,7 @@ Shader "ShapeRenderer/FillRadialGradient"
     Properties
     {
         [PerRendererData] _MainTex("Texture", 2D) = "white" {}
+        [PerRendererData] _TileOff("Tiling/Offset", Vector) = (1, 1, 0, 0)
         [PerRendererData] _Color1("Color 1", Color) = (1, 1, 1, 1)
         [PerRendererData] _Color2("Color 2", Color) = (1, 1, 1, 1)
         [PerRendererData] _Angle("Angle", Float) = 0.0
@@ -48,8 +49,6 @@ Shader "ShapeRenderer/FillRadialGradient"
             // use "frag" function as the pixel (fragment) shader
             #pragma fragment frag
 
-            #include "UnityCG.cginc"
-
             // vertex shader inputs
             struct vertexIn {
                 float4 pos : POSITION; // vertex position
@@ -64,7 +63,7 @@ Shader "ShapeRenderer/FillRadialGradient"
 
             // texture to sample
             sampler2D _MainTex;
-            float4 _MainTex_ST;
+            float4 _TileOff;
 
             fixed4 SampleTexture(float2 uv) {
                 fixed4 color = tex2D(_MainTex, uv);
@@ -79,8 +78,7 @@ Shader "ShapeRenderer/FillRadialGradient"
                 v2f output;
 
                 output.pos = UnityObjectToClipPos(input.pos);
-                output.uv = TRANSFORM_TEX(input.uv, _MainTex);
-
+                output.uv = input.uv;
                 return output;
             }
 
@@ -104,8 +102,7 @@ Shader "ShapeRenderer/FillRadialGradient"
                 color.g = (_Color1.g - _Color2.g) * t + _Color2.g;
                 color.b = (_Color1.b - _Color2.b) * t + _Color2.b;
                 color.a = (_Color1.a - _Color2.a) * t + _Color2.a;
-
-                color *= SampleTexture(input.uv);
+                color *= SampleTexture(input.uv *_TileOff.xy + _TileOff.zw);
 
                 return color;
             }
