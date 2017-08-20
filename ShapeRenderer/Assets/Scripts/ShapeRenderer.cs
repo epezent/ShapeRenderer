@@ -13,13 +13,14 @@ using UnityEditor;
 [ExecuteInEditMode]
 public class ShapeRenderer : MonoBehaviour
 {
-    public enum FillType { Solid, LinearGradient, RadialGradient};
+    public enum FillType { Solid, LinearGradient, RadialGradient, Custom};
+    public enum StrokeType { Solid, MultiGradient, Custom };
     public enum ColliderMode { Disabled, ToCollider, FromCollider }
     public enum SetColliderTo { Anchors, Vertices }
 
     [Tooltip("Enables/disables shape fill.")]
     public bool fill = true;
-    [Tooltip("The fill method to use.")]
+    [Tooltip("The fill type to use.")]
     public FillType fillType = FillType.Solid;
     public Color fillColor1 = Color.white;
     public Color fillColor2 = Color.black;
@@ -32,13 +33,25 @@ public class ShapeRenderer : MonoBehaviour
     [Tooltip("Controls the position of the gradient along the second axis")]
     [Range(-1.0f, 1.0f)]
     public float slider2 = 0.0f;
+    [Tooltip("Texture to be applied to the fill (multiply)")]
+    public Texture fillTexture;
+    //public Vector2 fillTextrueTiling = Vector2.one;
+    //public Vector2 fillTextureOffset = Vector2.zero;
+    [Tooltip("Material to be applied to the fill")]
+    public Material fillMaterial;
 
     [Tooltip("Enables/disables shape stroke.")]
     public bool stroke = false;
+    [Tooltip("The stroke type to use.")]
+    public StrokeType strokeType = StrokeType.Solid;
+    public Color strokeSolid = Color.black;
     [Tooltip("The gradient describing the color along the stroke.")]
     public Gradient strokeColor;
     [Tooltip("The shape stroke width in world units.")]
     public float strokeWidth = 10;
+    public Texture strokeTexture;
+    public Material strokeMaterial;
+
 
     [Tooltip("The shape anchor points in world units, relative to this GameObject's transform.")]
     public Vector2[] shapeAnchors = new Vector2[4] { new Vector2(100, -100), new Vector2(100, 100), new Vector2(-100, 100), new Vector2(-100, -100) };
@@ -59,15 +72,14 @@ public class ShapeRenderer : MonoBehaviour
     [Tooltip("Shows/hides the LineRenderer, MeshFilter, and MeshRenderer required by this ShapeRenderer. Hidden by default to reduce clutter.")]
     public bool showComponents = false;
 
-    private Material fillMaterial;
-    private Material strokeMaterial;
 
     private int defaultSmoothness = 50;
 
     private LineRenderer lr;
     private MeshFilter mf;
     private MeshRenderer mr;
-    private MaterialPropertyBlock mpb;
+    private MaterialPropertyBlock mpb_fill;
+    private MaterialPropertyBlock mpb_stroke;
     private PolygonCollider2D pc2d;   
 
     void Awake()
@@ -88,7 +100,8 @@ public class ShapeRenderer : MonoBehaviour
         if (fillMaterial == null)
             fillMaterial = Resources.Load("SR_FillLinearGradient") as Material;
         if (strokeMaterial == null)
-            strokeMaterial = new Material(Shader.Find("Particles/Alpha Blended Premultiply"));
+            strokeMaterial = Resources.Load("SR_Stroke") as Material;
+            // strokeMaterial = new Material(Shader.Find("Particles/Alpha Blended Premultiply"));
 
         // Set start sorting layers
         mr.sortingLayerID = sortingLayer;
@@ -157,8 +170,10 @@ public class ShapeRenderer : MonoBehaviour
         if (mr == null)
             mr = gameObject.AddComponent<MeshRenderer>() as MeshRenderer;
         // validate MaterialPropertyBlock
-        if (mpb == null)
-            mpb = new MaterialPropertyBlock();
+        if (mpb_fill == null)
+            mpb_fill = new MaterialPropertyBlock();
+        if (mpb_stroke == null)
+            mpb_stroke = new MaterialPropertyBlock();
     }
 
     private void ValidateAnchors()
@@ -363,34 +378,49 @@ public class ShapeRenderer : MonoBehaviour
     {
         if (fill)
         {
-            if (fillType == FillType.Solid)
+            if (fillType != FillType.Custom)
             {
-                fillMaterial = Resources.Load("SR_FillLinearGradient") as Material;
-                mpb.SetColor("_Color1", fillColor1);
-                mpb.SetColor("_Color2", fillColor1);
+                if (fillTexture != null)
+                {
+                    mpb_fill.SetTexture("_MainTex", fillTexture);
+                }
+                else
+                    mpb_fill.Clear();
+
+                if (fillType == FillType.Solid)
+                {
+                    fillMaterial = Resources.Load("SR_FillLinearGradient") as Material;
+                    mpb_fill.SetColor("_Color1", fillColor1);
+                    mpb_fill.SetColor("_Color2", fillColor1);
+                }
+                else if (fillType == FillType.LinearGradient)
+                {
+                    fillMaterial = Resources.Load("SR_FillLinearGradient") as Material;
+                    mpb_fill.SetColor("_Color1", fillColor1);
+                    mpb_fill.SetColor("_Color2", fillColor2);
+                }
+                else if (fillType == FillType.RadialGradient)
+                {
+                    fillMaterial = Resources.Load("SR_FillRadialGradient") as Material;
+                    mpb_fill.SetColor("_Color1", fillColor1);
+                    mpb_fill.SetColor("_Color2", fillColor2);
+
+                }
+                mpb_fill.SetFloat("_Angle", angle);
+                mpb_fill.SetFloat("_Slider1", slider1);
+                mpb_fill.SetFloat("_Slider2", slider2);
+                mr.SetPropertyBlock(mpb_fill);
             }
-            else if (fillType == FillType.LinearGradient)
-            {
-                fillMaterial = Resources.Load("SR_FillLinearGradient") as Material;
-                mpb.SetColor("_Color1", fillColor1);
-                mpb.SetColor("_Color2", fillColor2);
-            } else if (fillType == FillType.RadialGradient)
-            {
-                fillMaterial = Resources.Load("SR_FillRadialGradient") as Material;
-                mpb.SetColor("_Color1", fillColor1);
-                mpb.SetColor("_Color2", fillColor2);
-            }
-            mpb.SetFloat("_Angle", angle);
-            mpb.SetFloat("_Slider1", slider1);
-            mpb.SetFloat("_Slider2", slider2);
-            mr.SetPropertyBlock(mpb);
-            mr.material = fillMaterial;
+            
+            mr.sharedMaterial = fillMaterial;
+            //mr.material.SetTextureScale("_MainTex", fillTextrueTiling);
+            //mr.material.SetTextureOffset("_MainTex", fillTextureOffset);
             mr.sortingLayerID = sortingLayer;
             mr.sortingOrder = sortingOrder;
         }
         else
         {
-            mr.material = null;
+            mr.sharedMaterial = null;
         }
     }
 
@@ -401,12 +431,45 @@ public class ShapeRenderer : MonoBehaviour
     {
         if (stroke)
         {
-            lr.material = strokeMaterial;
-            lr.colorGradient = strokeColor;
-            lr.startWidth = strokeWidth;
-            lr.endWidth = strokeWidth;
-            lr.sortingLayerID = sortingLayer;
-            lr.sortingOrder = sortingOrder + 1;
+            if (strokeType != StrokeType.Custom)
+            {
+                if (strokeTexture != null)
+                {
+                    mpb_stroke.SetTexture("_MainTex", strokeTexture);
+                }
+                else
+                    mpb_stroke.Clear();
+                
+                if (strokeType == StrokeType.Solid)
+                {
+                    GradientColorKey[] gck = new GradientColorKey[2];
+                    GradientAlphaKey[] gak = new GradientAlphaKey[2];
+
+                    gck[0].color = strokeSolid; gck[0].time = 0.0f;
+                    gck[1].color = strokeSolid; gck[1].time = 1.0f;
+                    gak[0].alpha = strokeSolid.a; gak[0].time = 0.0f;
+                    gak[1].alpha = strokeSolid.a; gak[1].time = 1.0f;
+
+                    Gradient g = new Gradient();
+                    g.SetKeys(gck, gak);
+
+                    lr.colorGradient = g;
+                } 
+                else if (strokeType == StrokeType.MultiGradient)
+                {
+                    lr.colorGradient = strokeColor;
+                }
+
+                lr.startWidth = strokeWidth;
+                lr.endWidth = strokeWidth;
+
+                lr.SetPropertyBlock(mpb_stroke);
+                strokeMaterial = Resources.Load("SR_Stroke") as Material;
+                lr.sharedMaterial = strokeMaterial;
+
+                lr.sortingLayerID = sortingLayer;
+                lr.sortingOrder = sortingOrder + 1;
+            }
         }
     }
 

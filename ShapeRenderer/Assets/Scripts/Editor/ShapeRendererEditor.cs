@@ -16,10 +16,18 @@ public class ShapeRendererEditor : Editor {
     SerializedProperty angle;
     SerializedProperty slider1;
     SerializedProperty slider2;
+    SerializedProperty fillTexture;
+    //SerializedProperty fillTextrueTiling;
+    //SerializedProperty fillTextureOffset;
+    SerializedProperty fillMaterial;
 
     SerializedProperty stroke;
+    SerializedProperty strokeType;
+    SerializedProperty strokeSolid;
     SerializedProperty strokeColor;
     SerializedProperty strokeWidth;
+    SerializedProperty strokeTexture;
+    SerializedProperty strokeMaterial;
 
     SerializedProperty shapeAnchors;
     SerializedProperty shapeRadiil;
@@ -41,10 +49,21 @@ public class ShapeRendererEditor : Editor {
         angle = serializedObject.FindProperty("angle");
         slider1 = serializedObject.FindProperty("slider1");
         slider2 = serializedObject.FindProperty("slider2");
+        fillTexture = serializedObject.FindProperty("fillTexture");
+        //fillTextrueTiling = serializedObject.FindProperty("fillTextrueTiling");
+        //fillTextureOffset = serializedObject.FindProperty("fillTextureOffset");
+
+        fillMaterial = serializedObject.FindProperty("fillMaterial");
         stroke = serializedObject.FindProperty("stroke");
+        strokeType = serializedObject.FindProperty("strokeType");
+        strokeSolid = serializedObject.FindProperty("strokeSolid");
         strokeColor = serializedObject.FindProperty("strokeColor");
         strokeWidth = serializedObject.FindProperty("strokeWidth");
-        shapeAnchors = serializedObject.FindProperty("shapeAnchors");
+        strokeTexture = serializedObject.FindProperty("strokeTexture");
+        strokeMaterial = serializedObject.FindProperty("strokeMaterial");
+
+
+    shapeAnchors = serializedObject.FindProperty("shapeAnchors");
         shapeRadiil = serializedObject.FindProperty("shapeRadii");
         radiiSmoothness = serializedObject.FindProperty("radiiSmoothness");
         sortingLayer = serializedObject.FindProperty("sortingLayer");
@@ -60,34 +79,67 @@ public class ShapeRendererEditor : Editor {
 
         EditorGUI.BeginChangeCheck();
 
-        EditorGUILayout.LabelField("Shape Appearance", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("Fill", EditorStyles.boldLabel);
 
-        EditorGUILayout.PropertyField(fill);
+        EditorGUILayout.PropertyField(fill, new GUIContent("Show"));
         if (fill.boolValue == true)
         {
             EditorGUILayout.PropertyField(fillType);
-            if ((ShapeRenderer.FillType)fillType.enumValueIndex == ShapeRenderer.FillType.Solid)
-                EditorGUILayout.PropertyField(fillColor1, new GUIContent("Color"));
-            else if ((ShapeRenderer.FillType)fillType.enumValueIndex == ShapeRenderer.FillType.LinearGradient)
+            if ((ShapeRenderer.FillType)fillType.enumValueIndex != ShapeRenderer.FillType.Custom)
             {
-                EditorGUILayout.PropertyField(fillColor1, new GUIContent("Color 1"));
-                EditorGUILayout.PropertyField(fillColor2, new GUIContent("Color 2"));
-                EditorGUILayout.PropertyField(angle);
+                if ((ShapeRenderer.FillType)fillType.enumValueIndex == ShapeRenderer.FillType.Solid)
+                {
+                    EditorGUILayout.PropertyField(fillColor1, new GUIContent("Color"));
+                }
+                else if ((ShapeRenderer.FillType)fillType.enumValueIndex == ShapeRenderer.FillType.LinearGradient)
+                {
+                    EditorGUILayout.PropertyField(fillColor1, new GUIContent("Color 1"));
+                    EditorGUILayout.PropertyField(fillColor2, new GUIContent("Color 2"));
+                    EditorGUILayout.PropertyField(angle);
+
+                }
+                else if ((ShapeRenderer.FillType)fillType.enumValueIndex == ShapeRenderer.FillType.RadialGradient)
+                {
+                    EditorGUILayout.PropertyField(fillColor1, new GUIContent("Color 1"));
+                    EditorGUILayout.PropertyField(fillColor2, new GUIContent("Color 2"));
+                    EditorGUILayout.PropertyField(slider1, new GUIContent("X"));
+                    EditorGUILayout.PropertyField(slider2, new GUIContent("Y"));
+                }
+                EditorGUILayout.PropertyField(fillTexture, new GUIContent("Texture"));
+                if ((Texture)fillTexture.objectReferenceValue != null)
+                {
+                    //EditorGUILayout.PropertyField(fillTextrueTiling, new GUIContent("Tiling"));
+                    //EditorGUILayout.PropertyField(fillTextureOffset, new GUIContent("Offset"));
+                }
+
+
             }
-            else if ((ShapeRenderer.FillType)fillType.enumValueIndex == ShapeRenderer.FillType.RadialGradient)
+            else
             {
-                EditorGUILayout.PropertyField(fillColor1, new GUIContent("Color 1"));
-                EditorGUILayout.PropertyField(fillColor2, new GUIContent("Color 2"));
-                EditorGUILayout.PropertyField(slider1, new GUIContent("X"));
-                EditorGUILayout.PropertyField(slider2, new GUIContent("Y"));
+                EditorGUILayout.PropertyField(fillMaterial);
             }
         }
 
-        EditorGUILayout.PropertyField(stroke);
+        EditorGUILayout.LabelField("Stroke", EditorStyles.boldLabel);
+
+        EditorGUILayout.PropertyField(stroke, new GUIContent("Show"));
         if (stroke.boolValue == true)
         {
-            EditorGUILayout.PropertyField(strokeColor);
+            EditorGUILayout.PropertyField(strokeType);
+            if ((ShapeRenderer.StrokeType)strokeType.enumValueIndex != ShapeRenderer.StrokeType.Custom)
+            {
+                if ((ShapeRenderer.StrokeType)strokeType.enumValueIndex == ShapeRenderer.StrokeType.Solid)
+                    EditorGUILayout.PropertyField(strokeSolid);
+                else if ((ShapeRenderer.StrokeType)strokeType.enumValueIndex == ShapeRenderer.StrokeType.MultiGradient)
+                    EditorGUILayout.PropertyField(strokeColor);
+                EditorGUILayout.PropertyField(strokeTexture);
+            }
+            else
+            {
+                EditorGUILayout.PropertyField(strokeMaterial);
+            }
             EditorGUILayout.PropertyField(strokeWidth);
+
         }
 
         EditorGUILayout.LabelField("Shape Geometry", EditorStyles.boldLabel);
