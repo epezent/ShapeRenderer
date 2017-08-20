@@ -8,20 +8,20 @@
 
 ShapeRenderer is a simple yet powerful tool for creating vector graphics directly in the Unity editor. With ShapeRender you can create and stylize any shapes you want on the fly without ever having to use third-party software. Because it creates dynamic meshes, your art will scale to any resolution without pixelation and your build sizes can be kept to a minimum. ShapeRender has an easy-to-use (and not overly bloated) interface similar to other built-in Renderer components. Simply attach a ShapeRender component to any GameObject and use the numerous appearance options to create your art. The ShapeRenderer component can also be controlled through scripting to achieve dynamic 2D animations, and supports 2D colliders for physics as well.
 
-This project was born out of my frustration with having to constantly reopen PhotoShop/Illustrator every time I needed to make changes to my art. It has also proven particularly useful for programmatically animating geometric shapes. While similar packages are available on the Asset Store for a fee, very few free alternatives exist. Hopefully ShapeRender can fill this void and help you make games quickly like it has helped me. Enjoy!
+This project was born out of my frustration with having to constantly reopen Photoshop/Illustrator every time I needed to make changes to my art. It has also proven particularly useful for programmatically animating geometric shapes. While similar packages are available on the Asset Store for a fee, very few free alternatives exist. Hopefully ShapeRender can fill this void and help you make games quickly like it has helped me. Enjoy!
 
 ## Main Features
 
 ### Shape Geometry
 
-- create **concave/conve** shapes with an unlimited number of **anchor points**
+- create **concave/convex** shapes with an unlimited number of **anchor points**
 - apply **rounded corners** with adjustable radii and smoothness
 - several built-in scripts for rapidly creating **primitives** such as Rectangles, Polygons, Triangles, Circles, Diamonds, and more
 - fast **C/C++ DLL** plugin handles heavy math and triangulation to keep framerates reasonably high during animation
 - multiple **Collider** options:
     - **To Collider** mode updates PolygonCollider2D points to match shape anchors or vertices
     - **From Collider** mode updates shape anchors to match PolygonCollider2D points
-    - optionally use the built-in PolygonCollider2D point editing tool to rapidly create shape geometry in From Collider mode
+    - use the built-in PolygonCollider2D point editing tool to rapidly create shape geometry in From Collider mode
 
 ### Shape Appearance
 
@@ -31,12 +31,12 @@ This project was born out of my frustration with having to constantly reopen Pho
     - 2-Color **radial gradient** with adjustable center and percent
 - **Stroke:**
     - variable **width**
-    - multi-color gradients
+    - solid or multi-color gradient stroke colors
 - apply separate **texture overlays** to Fill and Stroke
 - toggle fill/stroke on/off independently
 - supports **2D sorting layers** and works perfectly with Sprites, LineRenderers, etc.
 - comes with **custom materials and shaders** optimized to use MPBs and Per Renderer Data for fast material batching
-- optionally use your own materials for fill and stroke
+- optionally use your own materials for both fill and stroke
 
 ## Usage
 
