@@ -57,7 +57,6 @@ float poly_area1(const std::vector<Vector2>& vertices);
 float poly_area2(float* points_x, float* points_y, int size); 
 float poly_area2(const std::vector<Vector2>& vertices); 
 
-
 bool inside_triangle1(const Vector2& A, const Vector2& B, const Vector2& C, const Vector2& P);
 bool inside_triangle2(const Vector2& A, const Vector2& B, const Vector2& C, const Vector2& P);
 
