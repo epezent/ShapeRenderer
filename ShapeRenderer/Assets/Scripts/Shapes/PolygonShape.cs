@@ -94,7 +94,7 @@ public class PolygonShape : MonoBehaviour {
             sr.shapeRadii[i] = cornerRadius;
             sr.radiiSmoothness[i] = cornerSmoothness;
         }
-        sr.UpdateShapeAll();
+        sr.UpdateShapeGeometry();
     }    
     
 }

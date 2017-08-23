@@ -13,7 +13,7 @@ public class ShapeRendererEditor : Editor {
     SerializedProperty fillType;
     SerializedProperty fillColor1;
     SerializedProperty fillColor2;
-    SerializedProperty angle;
+    SerializedProperty fillAngle;
     SerializedProperty slider1;
     SerializedProperty slider2;
     SerializedProperty fillTexture;
@@ -42,18 +42,18 @@ public class ShapeRendererEditor : Editor {
 
     private void OnEnable()
     {
-        fill = serializedObject.FindProperty("fill");
-        fillType = serializedObject.FindProperty("fillType");
+        fill = serializedObject.FindProperty("fill_");
+        fillType = serializedObject.FindProperty("fillType_");
         fillColor1 = serializedObject.FindProperty("fillColor1");
         fillColor2 = serializedObject.FindProperty("fillColor2");
-        angle = serializedObject.FindProperty("angle");
+        fillAngle = serializedObject.FindProperty("fillAngle_");
         slider1 = serializedObject.FindProperty("slider1");
         slider2 = serializedObject.FindProperty("slider2");
         fillTexture = serializedObject.FindProperty("fillTexture");
         fillTextrueTiling = serializedObject.FindProperty("fillTextrueTiling");
         fillTextureOffset = serializedObject.FindProperty("fillTextureOffset");
-
         customFillMaterial = serializedObject.FindProperty("customFillMaterial");
+
         stroke = serializedObject.FindProperty("stroke");
         strokeType = serializedObject.FindProperty("strokeType");
         strokeSolid = serializedObject.FindProperty("strokeSolid");
@@ -62,13 +62,14 @@ public class ShapeRendererEditor : Editor {
         strokeTexture = serializedObject.FindProperty("strokeTexture");
         customStrokeMaterial = serializedObject.FindProperty("customStrokeMaterial");
 
-
-    shapeAnchors = serializedObject.FindProperty("shapeAnchors");
+        shapeAnchors = serializedObject.FindProperty("shapeAnchors");
         shapeRadiil = serializedObject.FindProperty("shapeRadii");
         radiiSmoothness = serializedObject.FindProperty("radiiSmoothness");
+
         sortingLayer = serializedObject.FindProperty("sortingLayer");
         sortingOrder = serializedObject.FindProperty("sortingOrder");
         colliderMode = serializedObject.FindProperty("colliderMode");
+
         setColliderTo = serializedObject.FindProperty("setColliderTo");
         showComponents = serializedObject.FindProperty("showComponents");
     }
@@ -95,7 +96,7 @@ public class ShapeRendererEditor : Editor {
                 {
                     EditorGUILayout.PropertyField(fillColor1, new GUIContent("Color 1"));
                     EditorGUILayout.PropertyField(fillColor2, new GUIContent("Color 2"));
-                    EditorGUILayout.PropertyField(angle);
+                    EditorGUILayout.PropertyField(fillAngle);
 
                 }
                 else if ((ShapeRenderer.FillType)fillType.enumValueIndex == ShapeRenderer.FillType.RadialGradient)

@@ -13,58 +13,146 @@ using UnityEditor;
 [ExecuteInEditMode]
 public class ShapeRenderer : MonoBehaviour
 {
-    public enum FillType { Solid, LinearGradient, RadialGradient, Custom};
-    public enum StrokeType { Solid, MultiGradient, Custom };
-    public enum ColliderMode { Disabled, ToCollider, FromCollider }
-    public enum SetColliderTo { Anchors, Vertices }
+    //-------------------------------------------------------------------------
+    // SHAPE FILL APPEARANCE
+    //-------------------------------------------------------------------------
 
+    public enum FillType { Solid, LinearGradient, RadialGradient, Custom };
+
+    [SerializeField]
     [Tooltip("Enables/disables shape fill.")]
-    public bool fill = true;
+    private bool fill_ = true;
+    public  bool fill
+    {
+        get { return fill_; }
+        set
+        {
+            if (fill_ != value)
+            {
+                fill_ = value;
+                updateFill = true;
+            }
+        }
+    }
+
+    [SerializeField]
     [Tooltip("The fill type to use.")]
-    public FillType fillType = FillType.Solid;
+    public FillType fillType_ = FillType.Solid;
+    public FillType fillType
+    {
+        get { return fillType_; }
+        set
+        {
+            if (fillType_ != value)
+            {
+                fillType_ = value;
+                updateFill = true;
+            }
+        }
+    }
+
+    [Tooltip("The fill color of the shape.")]
     public Color fillColor1 = Color.white;
+
+    [Tooltip("The second fill color of the shape.")]
     public Color fillColor2 = Color.black;
-    [Tooltip("The angle at which the linear gradient is applied")]
+
+    [SerializeField]
+    [Tooltip("The angle at which the linear gradient is applied.")]
     [Range(0.0f, 360.0f)]
-    public float angle;
-    [Tooltip("Controls the position of the gradient along the first axis")]
+    private float fillAngle_;
+    public float fillAngle
+    {
+        get { return fillAngle_; }
+        set
+        {
+            if (fillAngle_ != value)
+            {
+                fillAngle_ = value;
+                updateFill = true;
+            }
+        }
+    }
+
+    [Tooltip("Controls the position of the gradient along its axis axis.")]
     [Range(-1.0f, 1.0f)]
     public float slider1 = 0.0f;
-    [Tooltip("Controls the position of the gradient along the second axis")]
+
+    [Tooltip("Controls the position of the gradient along its second axis.")]
     [Range(-1.0f, 1.0f)]
     public float slider2 = 0.0f;
-    [Tooltip("Texture to be applied to the fill (multiply)")]
+
+    [Tooltip("Texture to be applied to the fill (multiply).")]
     public Texture fillTexture;
+
+    [Tooltip("Texture tiling in X and Y directions.")]
     public Vector2 fillTextrueTiling = Vector2.one;
+
+    [Tooltip("Texture offset in X and Y directions.")]
     public Vector2 fillTextureOffset = Vector2.zero;
-    [Tooltip("Material to be applied to the fill")]
+
+    [Tooltip("Custom material to be applied to the fill.")]
     public Material customFillMaterial;
+
+    private Material fillMaterial;
+
+    //-------------------------------------------------------------------------
+    // SHAPE STROKE APPEARANCE
+    //-------------------------------------------------------------------------
+
+    public enum StrokeType { Solid, MultiGradient, Custom };
 
     [Tooltip("Enables/disables shape stroke.")]
     public bool stroke = false;
+
     [Tooltip("The stroke type to use.")]
     public StrokeType strokeType = StrokeType.Solid;
+
+    [Tooltip("The solid color used along the stroke.")]
     public Color strokeSolid = Color.black;
+
     [Tooltip("The gradient describing the color along the stroke.")]
     public Gradient strokeColor;
+
     [Tooltip("The shape stroke width in world units.")]
     public float strokeWidth = 10;
     public Texture strokeTexture;
     public Material customStrokeMaterial;
 
+    private Material strokeMaterial;
+
+    //-------------------------------------------------------------------------
+    // SHAPE GEOMETRY
+    //-------------------------------------------------------------------------
 
     [Tooltip("The shape anchor points in world units, relative to this GameObject's transform.")]
     public Vector2[] shapeAnchors = new Vector2[4] { new Vector2(100, -100), new Vector2(100, 100), new Vector2(-100, 100), new Vector2(-100, -100) };
+
     [Tooltip("The radii, in world units, applied to corresponding shape anchor points.")]
     public float[] shapeRadii = new float[4] { 0f, 0f, 0f, 0f };
+
     [Tooltip("The number of line segment used to render each radius. Use as few as necessary for best performance.")]
     public int[] radiiSmoothness = new int[4] { 50, 50, 50, 50 };
+
+    private int defaultSmoothness = 50;
+
+    //-------------------------------------------------------------------------
+    // SORTING LAYERS
+    //-------------------------------------------------------------------------
 
     [Tooltip("The name of the ShapeRenderer's sorting layer. First add the desired sorting layer Unity's Layers dialog (top-right), then type it here.")]
     [SortingLayer]
     public int sortingLayer = 0;
+
     [Tooltip("The ShapeRenderer's order within a sorting layer.")]
     public int sortingOrder = 0;
+
+    //-------------------------------------------------------------------------
+    // COLLIDER
+    //-------------------------------------------------------------------------
+
+    public enum ColliderMode { Disabled, ToCollider, FromCollider }
+    public enum SetColliderTo { Anchors, Vertices }
 
     [Tooltip("Updates the attached PolygonCollider2D to match the shape geometry. Adds a new PolygonCollider2D if none exists.")]
     public ColliderMode colliderMode = ColliderMode.Disabled;
@@ -72,12 +160,18 @@ public class ShapeRenderer : MonoBehaviour
     [Tooltip("Shows/hides the LineRenderer, MeshFilter, and MeshRenderer required by this ShapeRenderer. Hidden by default to reduce clutter.")]
     public bool showComponents = false;
 
+    //-------------------------------------------------------------------------
+    // UPDATE FLAGS
+    //-------------------------------------------------------------------------
 
-    private Material fillMaterial;
-    private Material strokeMaterial;
+    bool updateGeometry = false;
+    bool updateFill = false;
+    bool updateStroke = false;
+    bool updateCollider = false;
 
-
-    private int defaultSmoothness = 50;
+    //-------------------------------------------------------------------------
+    // COMPONENET HANDLES
+    //-------------------------------------------------------------------------
 
     private LineRenderer lr;
     private MeshFilter mf;
@@ -86,26 +180,24 @@ public class ShapeRenderer : MonoBehaviour
     private MaterialPropertyBlock mpb_stroke;
     private PolygonCollider2D pc2d;   
 
+    //-------------------------------------------------------------------------
+    // MONOBEHAVIOR CALLBACKS
+    //-------------------------------------------------------------------------
+
     void Awake()
     {
-        // Add required Unity components
+        // Add required Unity components and check ranges
         ValidateComponents();
-        ValidateRanges();
-        ValidateAnchors();
+        ValidateValues();
 
         // Check for a PolgonCollider2D
         pc2d = GetComponent<PolygonCollider2D>();
-
-        // Create a new Mesh
-        mf.sharedMesh = new Mesh();
-        mf.sharedMesh.MarkDynamic();
 
         // Set default Materials
         if (fillMaterial == null)
             fillMaterial = Resources.Load("SR_FillLinearGradient") as Material;
         if (strokeMaterial == null)
             strokeMaterial = Resources.Load("SR_Stroke") as Material;
-            // strokeMaterial = new Material(Shader.Find("Particles/Alpha Blended Premultiply"));
 
         // Set start sorting layers
         mr.sortingLayerID = sortingLayer;
@@ -113,37 +205,12 @@ public class ShapeRenderer : MonoBehaviour
         mr.sortingLayerID = sortingLayer;
         mr.sortingOrder = sortingOrder;
 
-        // Hide required components
-        mr.hideFlags = HideFlags.HideInInspector;
-        mf.hideFlags = HideFlags.HideInInspector;
-        lr.hideFlags = HideFlags.HideInInspector;
+        // Show/Hide required components
+        ShowComponenets();
     }
-
-    // Called when script added or inspector element is changed (in editor only)
-    public void OnValidate()
-    {
-        ValidateComponents();
-        ValidateAnchors();
-        ValidateRanges();
-    }
-
-    private void OnEnable()
-    {
-        mr.enabled = fill;
-        lr.enabled = stroke;
-    }
-
-    private void OnDisable()
-    {
-        mr.enabled = false;
-        lr.enabled = false;
-    }
-
+    
     private void Start()
     {
-        #if UNITY_EDITOR
-        PrefabUtility.DisconnectPrefabInstance(gameObject); // to allow for generic shape prefab templates
-        #endif
         UpdateShapeAll();
     }
 
@@ -154,7 +221,72 @@ public class ShapeRenderer : MonoBehaviour
         if (!EditorApplication.isPlaying)
             UpdateShapeAll(); // we don't want to call this every frame when the game is playing in the editor
         #endif
+
+        if (updateGeometry)
+        {
+            UpdateShapeGeometry();
+            updateGeometry = false;
+        }
+        if (updateFill)
+        {
+            UpdateFillAppearance();
+            updateFill = false;
+        }
+        if (updateStroke)
+        {
+            UpdateStrokeAppearance();
+            updateStroke = false;
+        }
+        if (updateCollider)
+        {
+
+        }
+      
+
     }
+
+    private void OnEnable()
+    {
+        mr.enabled = fill_;
+        lr.enabled = stroke;
+    }
+
+    private void OnDisable()
+    {
+        mr.enabled = false;
+        lr.enabled = false;
+    }
+
+    // Called when script added or inspector element is changed (in editor only)
+    public void OnValidate()
+    {
+        ValidateComponents();
+        ValidateValues();
+    }
+
+    //-------------------------------------------------------------------------
+    // SHAPERENDERER DLL IMPORTS
+    //-------------------------------------------------------------------------
+
+    [DllImport("ShapeRenderer", EntryPoint = "compute_shape1")]
+    private static extern int ComputeShape1(float[] anchorsX, float[] anchorsY, float[] radii, int[] N, int anchorsSize,
+                                         float[] verticesX, float[] verticesY, int verticesSize,
+                                         int[] indices, int indicesSize, float[] u, float[] v);
+
+    [DllImport("ShapeRenderer", EntryPoint = "compute_shape2")]
+    private static extern int ComputeShape2(float[] anchorsX, float[] anchorsY, float[] radii, int[] N, int anchorsSize,
+                                         float[] verticesX, float[] verticesY, int verticesSize,
+                                         int[] indices, int indicesSize, float[] u, float[] v);
+
+    //-------------------------------------------------------------------------
+    // PUBLIC FUNCTIONS
+    //-------------------------------------------------------------------------
+
+
+
+    //-------------------------------------------------------------------------
+    // PRIVATE FUNCTIONS
+    //-------------------------------------------------------------------------
 
     private void ValidateComponents()
     {
@@ -168,6 +300,7 @@ public class ShapeRenderer : MonoBehaviour
         {
             mf = gameObject.AddComponent<MeshFilter>() as MeshFilter;
             mf.sharedMesh = new Mesh();
+            mf.sharedMesh.MarkDynamic();
         }
         // validate MeshRenderer
         mr = GetComponent<MeshRenderer>();
@@ -180,10 +313,21 @@ public class ShapeRenderer : MonoBehaviour
             mpb_stroke = new MaterialPropertyBlock();
     }
 
-    private void ValidateAnchors()
+    private void ValidateValues()
     {
+        if (shapeAnchors.Length < 3)
+            Array.Resize(ref shapeAnchors, 3);
         if (shapeRadii.Length != shapeAnchors.Length)
+        {
             Array.Resize(ref shapeRadii, shapeAnchors.Length);
+            for (int i = 0; i < shapeAnchors.Length; i++)
+            {
+                if (shapeRadii[i] < 0.0f)
+                    shapeRadii[i] = 0.0f;
+                if (radiiSmoothness[i] < 1)
+                    radiiSmoothness[i] = 1;
+            }
+        }
         if (radiiSmoothness.Length != shapeAnchors.Length)
         {
             Array.Resize(ref radiiSmoothness, shapeAnchors.Length);
@@ -193,25 +337,8 @@ public class ShapeRenderer : MonoBehaviour
                     radiiSmoothness[i] = defaultSmoothness;
             }
         }
-    }
-
-    private void ValidateRanges()
-    {
         if (strokeWidth < 0)
             strokeWidth = 0;
-        if (shapeAnchors.Length < 3)
-            Array.Resize(ref shapeAnchors, 3);
-        if (shapeRadii.Length < 3)
-            Array.Resize(ref shapeRadii, 3);
-        if (radiiSmoothness.Length < 3)
-            Array.Resize(ref radiiSmoothness, 3);
-        for (int i = 0; i < shapeAnchors.Length; i++)
-        {
-            if (shapeRadii[i] < 0.0f)
-                shapeRadii[i] = 0.0f;
-            if (radiiSmoothness[i] < 1)
-                radiiSmoothness[i] = 1;
-        }
     }
 
     /// <summary>
@@ -238,7 +365,7 @@ public class ShapeRenderer : MonoBehaviour
     /// </summary>
     private void UpdateEnabled()
     {
-        if (fill)
+        if (fill_)
             mr.enabled = true;
         else
             mr.enabled = false;
@@ -247,20 +374,6 @@ public class ShapeRenderer : MonoBehaviour
         else
             lr.enabled = false;
     }
-
-    //-------------------------------------------------------------------------
-    // DLL IMPORTS
-    //-------------------------------------------------------------------------
-
-    [DllImport("ShapeRenderer", EntryPoint = "compute_shape1")]
-    private static extern int ComputeShape1(float[] anchorsX, float[] anchorsY, float[] radii, int[] N, int anchorsSize,
-                                         float[] verticesX, float[] verticesY, int verticesSize,
-                                         int[] indices, int indicesSize, float[] u, float[] v);
-
-    [DllImport("ShapeRenderer", EntryPoint = "compute_shape2")]
-    private static extern int ComputeShape2(float[] anchorsX, float[] anchorsY, float[] radii, int[] N, int anchorsSize,
-                                         float[] verticesX, float[] verticesY, int verticesSize,
-                                         int[] indices, int indicesSize, float[] u, float[] v);
 
     //-------------------------------------------------------------------------
     // PUBLIC API FUNCTIONS
@@ -281,8 +394,7 @@ public class ShapeRenderer : MonoBehaviour
     /// </summary>
     public void UpdateShapeGeometry()
     {
-        ValidateAnchors();
-        ValidateRanges();
+        ValidateValues();
 
         // calculate sizes
         int anchorsSize = shapeAnchors.Length;
@@ -336,17 +448,15 @@ public class ShapeRenderer : MonoBehaviour
     /// </summary>
     public void UpdateFillGeometry(Vector3[] vertices, int[] indices, Vector2[] uv)
     {
-        if (fill)
+        if (fill_)
         {
-            GenerateMesh(vertices, indices, uv);
+            Mesh mesh = mf.sharedMesh;
+            mesh.Clear();
+            mesh.vertices = vertices;
+            mesh.triangles = indices;
+            mesh.uv = uv;
         }
-        else
-        {
-            //mf.sharedMesh = null;
-        }
-    }    
-
-   
+    }
 
     /// <summary>
     /// Updates the shape stroke geometry.
@@ -380,9 +490,9 @@ public class ShapeRenderer : MonoBehaviour
     /// </summary>
     public void UpdateFillAppearance()
     {
-        if (fill)
+        if (fill_)
         {
-            if (fillType != FillType.Custom)
+            if (fillType_ != FillType.Custom)
             {
                 if (fillTexture != null)
                 {
@@ -392,26 +502,26 @@ public class ShapeRenderer : MonoBehaviour
                 else
                     mpb_fill.Clear();
 
-                if (fillType == FillType.Solid)
+                if (fillType_ == FillType.Solid)
                 {
                     fillMaterial = Resources.Load("SR_FillLinearGradient") as Material;
                     mpb_fill.SetColor("_Color1", fillColor1);
                     mpb_fill.SetColor("_Color2", fillColor1);
                 }
-                else if (fillType == FillType.LinearGradient)
+                else if (fillType_ == FillType.LinearGradient)
                 {
                     fillMaterial = Resources.Load("SR_FillLinearGradient") as Material;
                     mpb_fill.SetColor("_Color1", fillColor1);
                     mpb_fill.SetColor("_Color2", fillColor2);
                 }
-                else if (fillType == FillType.RadialGradient)
+                else if (fillType_ == FillType.RadialGradient)
                 {
                     fillMaterial = Resources.Load("SR_FillRadialGradient") as Material;
                     mpb_fill.SetColor("_Color1", fillColor1);
                     mpb_fill.SetColor("_Color2", fillColor2);
 
                 }
-                mpb_fill.SetFloat("_Angle", angle);
+                mpb_fill.SetFloat("_Angle", fillAngle_);
                 mpb_fill.SetFloat("_Slider1", slider1);
                 mpb_fill.SetFloat("_Slider2", slider2);
                 mr.SetPropertyBlock(mpb_fill);
@@ -526,16 +636,6 @@ public class ShapeRenderer : MonoBehaviour
     {
         return new Vector2(V3.x, V3.y);
     }
-
-    public void GenerateMesh(Vector3[] vertices, int[] indices, Vector2[] uv)
-    {
-        Mesh mesh = mf.sharedMesh;
-        mesh.Clear();
-        mesh.vertices = vertices;
-        mesh.triangles = indices;
-        mesh.uv = uv;
-    }
-
 
     public static Vector2 RotateVector2(Vector2 vector, float degrees)
     {
