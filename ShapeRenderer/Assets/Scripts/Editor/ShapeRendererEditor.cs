@@ -14,8 +14,8 @@ public class ShapeRendererEditor : Editor {
     SerializedProperty fillColor1;
     SerializedProperty fillColor2;
     SerializedProperty fillAngle;
-    SerializedProperty slider1;
-    SerializedProperty slider2;
+    SerializedProperty fillOffset1;
+    SerializedProperty fillOffset2;
     SerializedProperty fillTexture;
     SerializedProperty fillTextrueTiling;
     SerializedProperty fillTextureOffset;
@@ -24,7 +24,7 @@ public class ShapeRendererEditor : Editor {
     SerializedProperty stroke;
     SerializedProperty strokeType;
     SerializedProperty strokeSolid;
-    SerializedProperty strokeColor;
+    SerializedProperty strokeGradient;
     SerializedProperty strokeWidth;
     SerializedProperty strokeTexture;
     SerializedProperty customStrokeMaterial;
@@ -44,34 +44,34 @@ public class ShapeRendererEditor : Editor {
     {
         fill = serializedObject.FindProperty("fill_");
         fillType = serializedObject.FindProperty("fillType_");
-        fillColor1 = serializedObject.FindProperty("fillColor1");
-        fillColor2 = serializedObject.FindProperty("fillColor2");
+        fillColor1 = serializedObject.FindProperty("fillColor1_");
+        fillColor2 = serializedObject.FindProperty("fillColor2_");
         fillAngle = serializedObject.FindProperty("fillAngle_");
-        slider1 = serializedObject.FindProperty("slider1");
-        slider2 = serializedObject.FindProperty("slider2");
-        fillTexture = serializedObject.FindProperty("fillTexture");
-        fillTextrueTiling = serializedObject.FindProperty("fillTextrueTiling");
-        fillTextureOffset = serializedObject.FindProperty("fillTextureOffset");
-        customFillMaterial = serializedObject.FindProperty("customFillMaterial");
+        fillOffset1 = serializedObject.FindProperty("fillOffset1_");
+        fillOffset2 = serializedObject.FindProperty("fillOffset1_");
+        fillTexture = serializedObject.FindProperty("fillTexture_");
+        fillTextrueTiling = serializedObject.FindProperty("fillTextrueTiling_");
+        fillTextureOffset = serializedObject.FindProperty("fillTextureOffset_");
+        customFillMaterial = serializedObject.FindProperty("customFillMaterial_");
 
-        stroke = serializedObject.FindProperty("stroke");
-        strokeType = serializedObject.FindProperty("strokeType");
-        strokeSolid = serializedObject.FindProperty("strokeSolid");
-        strokeColor = serializedObject.FindProperty("strokeColor");
-        strokeWidth = serializedObject.FindProperty("strokeWidth");
-        strokeTexture = serializedObject.FindProperty("strokeTexture");
-        customStrokeMaterial = serializedObject.FindProperty("customStrokeMaterial");
+        stroke = serializedObject.FindProperty("stroke_");
+        strokeType = serializedObject.FindProperty("strokeType_");
+        strokeSolid = serializedObject.FindProperty("strokeSolid_");
+        strokeGradient = serializedObject.FindProperty("strokeGradient_");
+        strokeWidth = serializedObject.FindProperty("strokeWidth_");
+        strokeTexture = serializedObject.FindProperty("strokeTexture_");
+        customStrokeMaterial = serializedObject.FindProperty("customStrokeMaterial_");
 
-        shapeAnchors = serializedObject.FindProperty("shapeAnchors");
-        shapeRadiil = serializedObject.FindProperty("shapeRadii");
-        radiiSmoothness = serializedObject.FindProperty("radiiSmoothness");
+        shapeAnchors = serializedObject.FindProperty("shapeAnchors_");
+        shapeRadiil = serializedObject.FindProperty("shapeRadii_");
+        radiiSmoothness = serializedObject.FindProperty("radiiSmoothness_");
 
-        sortingLayer = serializedObject.FindProperty("sortingLayer");
-        sortingOrder = serializedObject.FindProperty("sortingOrder");
-        colliderMode = serializedObject.FindProperty("colliderMode");
+        sortingLayer = serializedObject.FindProperty("sortingLayer_");
+        sortingOrder = serializedObject.FindProperty("sortingOrder_");
+        colliderMode = serializedObject.FindProperty("colliderMode_");
 
-        setColliderTo = serializedObject.FindProperty("setColliderTo");
-        showComponents = serializedObject.FindProperty("showComponents");
+        setColliderTo = serializedObject.FindProperty("setColliderTo_");
+        showComponents = serializedObject.FindProperty("showComponents_");
     }
 
     public override void OnInspectorGUI()
@@ -103,8 +103,8 @@ public class ShapeRendererEditor : Editor {
                 {
                     EditorGUILayout.PropertyField(fillColor1, new GUIContent("Color 1"));
                     EditorGUILayout.PropertyField(fillColor2, new GUIContent("Color 2"));
-                    EditorGUILayout.PropertyField(slider1, new GUIContent("X"));
-                    EditorGUILayout.PropertyField(slider2, new GUIContent("Y"));
+                    EditorGUILayout.PropertyField(fillOffset1, new GUIContent("X"));
+                    EditorGUILayout.PropertyField(fillOffset2, new GUIContent("Y"));
                 }
                 EditorGUILayout.PropertyField(fillTexture, new GUIContent("Texture"));
                 if ((Texture)fillTexture.objectReferenceValue != null)
@@ -132,7 +132,7 @@ public class ShapeRendererEditor : Editor {
                 if ((ShapeRenderer.StrokeType)strokeType.enumValueIndex == ShapeRenderer.StrokeType.Solid)
                     EditorGUILayout.PropertyField(strokeSolid);
                 else if ((ShapeRenderer.StrokeType)strokeType.enumValueIndex == ShapeRenderer.StrokeType.MultiGradient)
-                    EditorGUILayout.PropertyField(strokeColor);
+                    EditorGUILayout.PropertyField(strokeGradient);
                 EditorGUILayout.PropertyField(strokeTexture);
             }
             else

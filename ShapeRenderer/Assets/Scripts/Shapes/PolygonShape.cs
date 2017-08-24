@@ -22,14 +22,6 @@ public class PolygonShape : MonoBehaviour {
     [Range(0, 100)]
     public int cornerSmoothness = 50;
 
-    // Previous Properties
-    private int prevSides;
-    private PolygonParameter prevParameter;
-    private float prevValue;
-    private float prevRotation;
-    private float prevCornerRadius;
-    private int prevCornerSmoothness;
-
     // ShapeRenderer Component
     private ShapeRenderer sr;
 
@@ -37,38 +29,15 @@ public class PolygonShape : MonoBehaviour {
     void Start()
     {
         sr = GetComponent<ShapeRenderer>();
-        CheckStateChange();
         DrawShape();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (CheckStateChange())
-            DrawShape();
+        DrawShape();
     }  
     
-    // Returns true if any shape properties have been changed
-    bool CheckStateChange()
-    {
-        if (sides != prevSides ||
-            parameterType != prevParameter ||
-            parameterValue != prevValue ||
-            cornerRadius != prevCornerRadius ||
-            cornerSmoothness != prevCornerSmoothness ||
-            rotation != prevRotation)
-        {
-            prevSides = sides;
-            prevParameter = parameterType;
-            prevValue = parameterValue;
-            prevCornerRadius = cornerRadius;
-            prevCornerSmoothness = cornerSmoothness;
-            prevRotation = rotation;
-            return true;
-        }
-        return false;
-    }
-
     // Updates the ShapeRender Mesh with the shape geometry
     void DrawShape()
     {
@@ -83,18 +52,21 @@ public class PolygonShape : MonoBehaviour {
         else
             r = parameterValue;
 
-        sr.shapeAnchors = new Vector2[sides];
-        sr.shapeRadii = new float[sides];
-        sr.radiiSmoothness = new int[sides];
+        Vector2[] shapeAnchors = new Vector2[sides];
+        float[] shapeRadii = new float[sides];
+        int[] radiiSmoothness = new int[sides];
 
         for (int i = 0; i < sides; i++)
         {
             float anchorAngle = i * angleIncrement + offset;
-            sr.shapeAnchors[i] = new Vector2(Mathf.Cos(anchorAngle), Mathf.Sin(anchorAngle)) * r;
-            sr.shapeRadii[i] = cornerRadius;
-            sr.radiiSmoothness[i] = cornerSmoothness;
+            shapeAnchors[i] = new Vector2(Mathf.Cos(anchorAngle), Mathf.Sin(anchorAngle)) * r;
+            shapeRadii[i] = cornerRadius;
+            radiiSmoothness[i] = cornerSmoothness;
         }
-        sr.UpdateShapeGeometry();
+
+        sr.shapeAnchors = shapeAnchors;
+        sr.shapeRadii = shapeRadii;
+        sr.radiiSmoothness = radiiSmoothness;
     }    
     
 }

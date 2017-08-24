@@ -18,46 +18,18 @@ public class RectangleShape : MonoBehaviour {
     [Range(0,100)]
     public int cornerSmoothness = 50;
 
-    // Previous Properties
-    private float prevWidth;
-    private float prevHeight;
-    private float prevCornerRadius;
-    private int prevCornerSmoothness;
-    private float prevRotation;
-
     // ShapeRenderer Component
     private ShapeRenderer sr;
 
     // Use this for initialization
     void Start () {
         sr = GetComponent<ShapeRenderer>();
-        CheckStateChange();
         DrawShape();
     }
 
     // Update is called once per frame
     void Update () {
-        if (CheckStateChange())
-            DrawShape();
-    }
-
-    // Returns true if any shape properties have been changed
-    bool CheckStateChange()
-    {
-        if (width != prevWidth ||
-            height != prevHeight ||
-            cornerRadius != prevCornerRadius ||
-            cornerSmoothness != prevCornerSmoothness ||
-            rotation != prevRotation)
-        {
-            prevWidth = width;
-            prevHeight = height;
-            prevCornerRadius = cornerRadius;
-            prevCornerSmoothness = cornerSmoothness;
-            prevRotation = rotation;
-            return true;
-        }
-        return false;
+        DrawShape();
     }
 
     // Updates the ShapeRender Mesh with the shape geometry
@@ -65,19 +37,18 @@ public class RectangleShape : MonoBehaviour {
     {
         float half_w = width * 0.5f;
         float half_h = height * 0.5f;
-        sr.shapeAnchors = new Vector2[4] {
+        Vector2[] shapeAnchors = new Vector2[4] {
             new Vector2(half_w, half_h),
             new Vector2(-half_w, half_h),
             new Vector2(-half_w, -half_h),
             new Vector2(half_w, -half_h)
         };
-        sr.shapeRadii = new float[4] { cornerRadius, cornerRadius, cornerRadius, cornerRadius };
-        sr.radiiSmoothness = new int[4] { cornerSmoothness, cornerSmoothness, cornerSmoothness, cornerSmoothness };
-
         for (int i = 0; i < 4; i++)
-            sr.shapeAnchors[i] = ShapeRenderer.RotateVector2(sr.shapeAnchors[i], rotation);
+            shapeAnchors[i] = ShapeRenderer.RotateVector2(shapeAnchors[i], rotation);
 
-        sr.UpdateShapeAll();
+        sr.shapeAnchors = shapeAnchors;
+        sr.shapeRadii = new float[4] { cornerRadius, cornerRadius, cornerRadius, cornerRadius };
+        sr.radiiSmoothness = new int[4] { cornerSmoothness, cornerSmoothness, cornerSmoothness, cornerSmoothness };    
     }
 
 }

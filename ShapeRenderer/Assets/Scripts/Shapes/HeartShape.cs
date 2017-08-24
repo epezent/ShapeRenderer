@@ -20,66 +20,41 @@ public class HeartShape : MonoBehaviour {
     [Range(3, 100)]
     public int smoothness = 50;
 
-    // Previous Properties
-    private float prevSize;
-    private float prevScaleX;
-    private float prevScaleY;
-    private float prevRotation;
-    private int prevSmoothness;
-
     // ShapeRenderer Component
     private ShapeRenderer sr;
 
     // Use this for initialization
     void Start () {
         sr = GetComponent<ShapeRenderer>();
-        CheckStateChange();
         DrawShape();
 	}
 	
 	// Update is called once per frame
 	void Update () {
-        if (CheckStateChange())
-            DrawShape();
+        DrawShape();
 	}
-
-    // Returns true if any shape properties have been changed
-    bool CheckStateChange()
-    {
-        if (size != prevSize ||
-            scaleX != prevScaleX ||
-            scaleY != prevScaleY ||
-            rotation != prevRotation ||
-            smoothness != prevSmoothness)
-        {
-            prevSize = size;
-            prevScaleX = scaleX;
-            prevScaleY = scaleY;
-            prevRotation = rotation;
-            prevSmoothness = smoothness;
-            return true;
-        }
-        return false;
-    }
 
     // Updates the ShapeRender Mesh with the shape geometry
     void DrawShape()
     {
         float angleIncrement = 2 * Mathf.PI / smoothness;
-        sr.shapeAnchors = new Vector2[smoothness];
-        sr.shapeRadii = new float[smoothness];
-        sr.radiiSmoothness = new int[smoothness];
+        Vector2[] shapeAnchors = new Vector2[smoothness];
+        float[] shapeRadii = new float[smoothness];
+        int[] radiiSmoothness = new int[smoothness];
         for (int i = 0; i < smoothness; i++)
         {
             float anchorAngle = i * angleIncrement;
-            sr.shapeAnchors[i] = new Vector2(16.0f * Mathf.Pow(Mathf.Sin(anchorAngle), 3),
+            shapeAnchors[i] = new Vector2(16.0f * Mathf.Pow(Mathf.Sin(anchorAngle), 3),
                 13.0f * Mathf.Cos(anchorAngle) - 5.0f * Mathf.Cos(2.0f * anchorAngle) - 2.0f * Mathf.Cos(3.0f * anchorAngle) - Mathf.Cos(4.0f * anchorAngle)) * size * 6.0f / 200.0f;
-            sr.shapeAnchors[i].x *= scaleX;
-            sr.shapeAnchors[i].y *= scaleY;
-            sr.shapeAnchors[i] = ShapeRenderer.RotateVector2(sr.shapeAnchors[i], rotation);
-            sr.shapeRadii[i] = 0;
-            sr.radiiSmoothness[i] = 0;
+            shapeAnchors[i].x *= scaleX;
+            shapeAnchors[i].y *= scaleY;
+            shapeAnchors[i] = ShapeRenderer.RotateVector2(shapeAnchors[i], rotation);
+            shapeRadii[i] = 0;
+            radiiSmoothness[i] = 0;
         }
-        sr.UpdateShapeAll();
+
+        sr.shapeAnchors = shapeAnchors;
+        sr.shapeRadii = shapeRadii;
+        sr.radiiSmoothness = radiiSmoothness;
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using System.Runtime.InteropServices;
 #if UNITY_EDITOR
@@ -37,8 +38,8 @@ public class ShapeRenderer : MonoBehaviour
 
     [SerializeField]
     [Tooltip("The fill type to use.")]
-    public FillType fillType_ = FillType.Solid;
-    public FillType fillType
+    private FillType fillType_ = FillType.Solid;
+    public  FillType fillType
     {
         get { return fillType_; }
         set
@@ -51,11 +52,37 @@ public class ShapeRenderer : MonoBehaviour
         }
     }
 
+    [SerializeField]
     [Tooltip("The fill color of the shape.")]
-    public Color fillColor1 = Color.white;
+    private Color fillColor1_ = Color.white;
+    public  Color fillColor1
+    {
+        get { return fillColor1_; }
+        set
+        {
+            if (fillColor1_ != value)
+            {
+                fillColor1_ = value;
+                updateFill = true;
+            }
+        }
+    }
 
+    [SerializeField]
     [Tooltip("The second fill color of the shape.")]
-    public Color fillColor2 = Color.black;
+    private Color fillColor2_ = Color.black;
+    public  Color fillColor2
+    {
+        get { return fillColor2_; }
+        set
+        {
+            if (fillColor2_ != value)
+            {
+                fillColor2_ = value;
+                updateFill = true;
+            }
+        }
+    }
 
     [SerializeField]
     [Tooltip("The angle at which the linear gradient is applied.")]
@@ -74,25 +101,104 @@ public class ShapeRenderer : MonoBehaviour
         }
     }
 
+    [SerializeField]
     [Tooltip("Controls the position of the gradient along its axis axis.")]
     [Range(-1.0f, 1.0f)]
-    public float slider1 = 0.0f;
+    private float fillOffset1_ = 0.0f;
+    public float fillOffset1
+    {
+        get { return fillOffset1_; }
+        set
+        {
+            if (fillOffset1_ != value)
+            {
+                fillOffset1_ = value;
+                updateFill = true;
+            }
+        }
+    }
 
+    [SerializeField]
     [Tooltip("Controls the position of the gradient along its second axis.")]
     [Range(-1.0f, 1.0f)]
-    public float slider2 = 0.0f;
+    private float fillOffset2_ = 0.0f;
+    public  float fillOffset2
+    {
+        get { return fillOffset2_; }
+        set
+        {
+            if (fillOffset2_ != value)
+            {
+                fillOffset2_ = value;
+                updateFill = true;
+            }
+        }
+    }
 
+    [SerializeField]
     [Tooltip("Texture to be applied to the fill (multiply).")]
-    public Texture fillTexture;
+    private Texture fillTexture_;
+    public Texture fillTexture
+    {
+        get { return fillTexture_; }
+        set
+        {
+            if (fillTexture_ != value)
+            {
+                fillTexture_ = value;
+                updateFill = true;
+            }
+        }
+    }
 
+    [SerializeField]
     [Tooltip("Texture tiling in X and Y directions.")]
-    public Vector2 fillTextrueTiling = Vector2.one;
+    private Vector2 fillTextrueTiling_ = Vector2.one;
+    public Vector2 fillTextrueTiling
+    {
+        get { return fillTextrueTiling_; }
+        set
+        {
+            if (fillTextrueTiling_ != value)
+            {
+                fillTextrueTiling_ = value;
+                updateFill = true;
+            }
+        }
+    }
 
+    [SerializeField]
     [Tooltip("Texture offset in X and Y directions.")]
-    public Vector2 fillTextureOffset = Vector2.zero;
+    private Vector2 fillTextureOffset_ = Vector2.zero;
+    public Vector2 fillTextureOffset
+    {
+        get { return fillTextureOffset_; }
+        set
+        {
+            if (fillTextureOffset_ != value)
+            {
+                fillTextureOffset_ = value;
+                updateFill = true;
+            }
+        }
+    }
 
+
+    [SerializeField]
     [Tooltip("Custom material to be applied to the fill.")]
-    public Material customFillMaterial;
+    private Material customFillMaterial_;
+    public Material customFillMaterial
+    {
+        get { return customFillMaterial_; }
+        set
+        {
+            if (customFillMaterial_ != value)
+            {
+                customFillMaterial_ = value;
+                updateFill = true;
+            }
+        }
+    }
 
     private Material fillMaterial;
 
@@ -102,22 +208,115 @@ public class ShapeRenderer : MonoBehaviour
 
     public enum StrokeType { Solid, MultiGradient, Custom };
 
+    [SerializeField]
     [Tooltip("Enables/disables shape stroke.")]
-    public bool stroke = false;
+    private bool stroke_ = false;
+    public bool stroke
+    {
+        get { return stroke_; }
+        set
+        {
+            if (stroke_ != value)
+            {
+                stroke_ = value;
+                updateStroke = true;
+            }
+        }
+    }
 
+    [SerializeField]
     [Tooltip("The stroke type to use.")]
-    public StrokeType strokeType = StrokeType.Solid;
+    private StrokeType strokeType_ = StrokeType.Solid;
+    public StrokeType strokeType
+    {
+        get { return strokeType_; }
+        set
+        {
+            if (strokeType_ != value)
+            {
+                strokeType_ = value;
+                updateStroke = true;
+            }
+        }
+    }
 
+    [SerializeField]
     [Tooltip("The solid color used along the stroke.")]
-    public Color strokeSolid = Color.black;
+    private Color strokeSolid_ = Color.black;
+    public Color strokeSolid
+    {
+        get { return strokeSolid_; }
+        set
+        {
+            if (strokeSolid_ != value)
+            {
+                strokeSolid_ = value;
+                updateStroke = true;
+            }
+        }
+    }
 
+    [SerializeField]
     [Tooltip("The gradient describing the color along the stroke.")]
-    public Gradient strokeColor;
+    private Gradient strokeGradient_;
+    public Gradient strokeGradient
+    {
+        get { return strokeGradient_; }
+        set
+        {
+            if (strokeGradient_ != value)
+            {
+                strokeGradient_ = value;
+                updateStroke = true;
+            }
+        }
+    }
 
+    [SerializeField]
     [Tooltip("The shape stroke width in world units.")]
-    public float strokeWidth = 10;
-    public Texture strokeTexture;
-    public Material customStrokeMaterial;
+    private float strokeWidth_ = 10;
+    public float strokeWidth
+    {
+        get { return strokeWidth_; }
+        set
+        {
+            if (strokeWidth_ != value)
+            {
+                strokeWidth_ = value;
+                updateStroke = true;
+            }
+        }
+    }
+
+    [SerializeField]
+    private Texture strokeTexture_;
+    public Texture strokeTexture
+    {
+        get { return strokeTexture_; }
+        set
+        {
+            if (strokeTexture_ != value)
+            {
+                strokeTexture_ = value;
+                updateStroke = true;
+            }
+        }
+    }
+
+    [SerializeField]
+    private Material customStrokeMaterial_;
+    public Material customStrokeMaterial
+    {
+        get { return customStrokeMaterial_; }
+        set
+        {
+            if (customStrokeMaterial_ != value)
+            {
+                customStrokeMaterial_ = value;
+                updateStroke = true;
+            }
+        }
+    }
 
     private Material strokeMaterial;
 
@@ -125,14 +324,54 @@ public class ShapeRenderer : MonoBehaviour
     // SHAPE GEOMETRY
     //-------------------------------------------------------------------------
 
+    [SerializeField]
     [Tooltip("The shape anchor points in world units, relative to this GameObject's transform.")]
-    public Vector2[] shapeAnchors = new Vector2[4] { new Vector2(100, -100), new Vector2(100, 100), new Vector2(-100, 100), new Vector2(-100, -100) };
+    private Vector2[] shapeAnchors_ = new Vector2[4] { new Vector2(100, -100), new Vector2(100, 100), new Vector2(-100, 100), new Vector2(-100, -100) };
+    public Vector2[] shapeAnchors
+    {
+        get { return shapeAnchors_; }
+        set
+        {
+            if (!shapeAnchors_.SequenceEqual(value))
+            {
+                shapeAnchors_ = value;
+                updateGeometry = true;
+            }
+        }
+    }
 
+
+    [SerializeField]
     [Tooltip("The radii, in world units, applied to corresponding shape anchor points.")]
-    public float[] shapeRadii = new float[4] { 0f, 0f, 0f, 0f };
+    private float[] shapeRadii_ = new float[4] { 0f, 0f, 0f, 0f };
+    public float[] shapeRadii
+    {
+        get { return shapeRadii_; }
+        set
+        {
+            if (!shapeRadii_.SequenceEqual(value))
+            {
+                shapeRadii_ = value;
+                updateGeometry = true;
+            }
+        }
+    }
 
+    [SerializeField]
     [Tooltip("The number of line segment used to render each radius. Use as few as necessary for best performance.")]
-    public int[] radiiSmoothness = new int[4] { 50, 50, 50, 50 };
+    private int[] radiiSmoothness_ = new int[4] { 50, 50, 50, 50 };
+    public int[] radiiSmoothness
+    {
+        get { return radiiSmoothness_; }
+        set
+        {
+            if (!radiiSmoothness_.SequenceEqual(value))
+            {
+                radiiSmoothness_ = value;
+                updateGeometry = true;
+            }
+        }
+    }
 
     private int defaultSmoothness = 50;
 
@@ -140,12 +379,38 @@ public class ShapeRenderer : MonoBehaviour
     // SORTING LAYERS
     //-------------------------------------------------------------------------
 
+    [SerializeField]
     [Tooltip("The name of the ShapeRenderer's sorting layer. First add the desired sorting layer Unity's Layers dialog (top-right), then type it here.")]
     [SortingLayer]
-    public int sortingLayer = 0;
+    private int sortingLayer_ = 0;
+    public int sortingLayer
+    {
+        get { return sortingLayer_; }
+        set
+        {
+            if (sortingLayer_ != value)
+            {
+                sortingLayer_ = value;
+                updateSortingLayer = true;
+            }
+        }
+    }    
 
+    [SerializeField]
     [Tooltip("The ShapeRenderer's order within a sorting layer.")]
-    public int sortingOrder = 0;
+    private int sortingOrder_ = 0;
+    public int sortingOrder
+    {
+        get { return sortingOrder_; }
+        set
+        {
+            if (sortingOrder_ != value)
+            {
+                sortingOrder_ = value;
+                updateSortingLayer = true;
+            }
+        }
+    }
 
     //-------------------------------------------------------------------------
     // COLLIDER
@@ -154,20 +419,62 @@ public class ShapeRenderer : MonoBehaviour
     public enum ColliderMode { Disabled, ToCollider, FromCollider }
     public enum SetColliderTo { Anchors, Vertices }
 
+    [SerializeField]
     [Tooltip("Updates the attached PolygonCollider2D to match the shape geometry. Adds a new PolygonCollider2D if none exists.")]
-    public ColliderMode colliderMode = ColliderMode.Disabled;
-    public SetColliderTo setColliderTo = SetColliderTo.Anchors;
-    [Tooltip("Shows/hides the LineRenderer, MeshFilter, and MeshRenderer required by this ShapeRenderer. Hidden by default to reduce clutter.")]
-    public bool showComponents = false;
+    private ColliderMode colliderMode_ = ColliderMode.Disabled;
+    public ColliderMode colliderMode
+    {
+        get { return colliderMode_; }
+        set
+        {
+            if (colliderMode_ != value)
+            {
+                colliderMode_ = value;
+                updateCollider = true;
+            }
+        }
+    }
+
+    [SerializeField]
+    private SetColliderTo setColliderTo_ = SetColliderTo.Anchors;
+    public SetColliderTo setColliderTo
+    {
+        get { return setColliderTo_; }
+        set
+        {
+            if (setColliderTo_ != value)
+            {
+                setColliderTo_ = value;
+                updateCollider = true;
+            }
+        }
+    }
+
+    [SerializeField]
+    [Tooltip("Shows/hides the LineRenderer, MeshFilter, and MeshRenderer required by this ShapeRenderer in the Inspector. Hidden by default to reduce clutter.")]
+    private bool showComponents_ = false;
+    public bool showComponents
+    {
+        get { return showComponents_; }
+        set
+        {
+            if (showComponents_ != value)
+            {
+                showComponents_ = value;
+                ShowComponenets();
+            }
+        }
+    }
 
     //-------------------------------------------------------------------------
     // UPDATE FLAGS
     //-------------------------------------------------------------------------
 
-    bool updateGeometry = false;
-    bool updateFill = false;
-    bool updateStroke = false;
-    bool updateCollider = false;
+    private bool updateGeometry = false;
+    private bool updateFill = false;
+    private bool updateStroke = false;
+    private bool updateSortingLayer = false;
+    private bool updateCollider = false;
 
     //-------------------------------------------------------------------------
     // COMPONENET HANDLES
@@ -200,10 +507,10 @@ public class ShapeRenderer : MonoBehaviour
             strokeMaterial = Resources.Load("SR_Stroke") as Material;
 
         // Set start sorting layers
-        mr.sortingLayerID = sortingLayer;
-        mr.sortingOrder = sortingOrder;
-        mr.sortingLayerID = sortingLayer;
-        mr.sortingOrder = sortingOrder;
+        mr.sortingLayerID = sortingLayer_;
+        mr.sortingOrder = sortingOrder_;
+        mr.sortingLayerID = sortingLayer_;
+        mr.sortingOrder = sortingOrder_;
 
         // Show/Hide required components
         ShowComponenets();
@@ -241,14 +548,18 @@ public class ShapeRenderer : MonoBehaviour
         {
 
         }
-      
+        if (updateSortingLayer)
+        {
+            UpdateSortingLayer();
+            updateSortingLayer = false;
+        }     
 
     }
 
     private void OnEnable()
     {
         mr.enabled = fill_;
-        lr.enabled = stroke;
+        lr.enabled = stroke_;
     }
 
     private void OnDisable()
@@ -315,30 +626,30 @@ public class ShapeRenderer : MonoBehaviour
 
     private void ValidateValues()
     {
-        if (shapeAnchors.Length < 3)
-            Array.Resize(ref shapeAnchors, 3);
-        if (shapeRadii.Length != shapeAnchors.Length)
+        if (shapeAnchors_.Length < 3)
+            Array.Resize(ref shapeAnchors_, 3);
+        if (shapeRadii_.Length != shapeAnchors_.Length)
         {
-            Array.Resize(ref shapeRadii, shapeAnchors.Length);
-            for (int i = 0; i < shapeAnchors.Length; i++)
+            Array.Resize(ref shapeRadii_, shapeAnchors_.Length);
+            for (int i = 0; i < shapeAnchors_.Length; i++)
             {
-                if (shapeRadii[i] < 0.0f)
-                    shapeRadii[i] = 0.0f;
-                if (radiiSmoothness[i] < 1)
-                    radiiSmoothness[i] = 1;
+                if (shapeRadii_[i] < 0.0f)
+                    shapeRadii_[i] = 0.0f;
+                if (radiiSmoothness_[i] < 1)
+                    radiiSmoothness_[i] = 1;
             }
         }
-        if (radiiSmoothness.Length != shapeAnchors.Length)
+        if (radiiSmoothness_.Length != shapeAnchors_.Length)
         {
-            Array.Resize(ref radiiSmoothness, shapeAnchors.Length);
-            for (int i = 0; i < radiiSmoothness.Length; i++)
+            Array.Resize(ref radiiSmoothness_, shapeAnchors_.Length);
+            for (int i = 0; i < radiiSmoothness_.Length; i++)
             {
-                if (radiiSmoothness[i] == 0)
-                    radiiSmoothness[i] = defaultSmoothness;
+                if (radiiSmoothness_[i] == 0)
+                    radiiSmoothness_[i] = defaultSmoothness;
             }
         }
-        if (strokeWidth < 0)
-            strokeWidth = 0;
+        if (strokeWidth_ < 0)
+            strokeWidth_ = 0;
     }
 
     /// <summary>
@@ -346,7 +657,7 @@ public class ShapeRenderer : MonoBehaviour
     /// </summary>
     private void ShowComponenets()
     {
-        if (showComponents)
+        if (showComponents_)
         {
             mr.hideFlags = HideFlags.None;
             mf.hideFlags = HideFlags.None;
@@ -369,7 +680,7 @@ public class ShapeRenderer : MonoBehaviour
             mr.enabled = true;
         else
             mr.enabled = false;
-        if (stroke)
+        if (stroke_)
             lr.enabled = true;
         else
             lr.enabled = false;
@@ -386,6 +697,7 @@ public class ShapeRenderer : MonoBehaviour
     {
         UpdateShapeGeometry();
         UpdateShapeAppearance();
+        UpdateSortingLayer();
         UpdateEnabled();
     }
 
@@ -397,24 +709,24 @@ public class ShapeRenderer : MonoBehaviour
         ValidateValues();
 
         // calculate sizes
-        int anchorsSize = shapeAnchors.Length;
+        int anchorsSize = shapeAnchors_.Length;
         int verticesSize = 0;
         for (int i = 0; i < anchorsSize; i++)
         {
-            if (radiiSmoothness[i] == 0 || radiiSmoothness[i] == 1 || shapeRadii[i] <= 0.0)
+            if (radiiSmoothness_[i] == 0 || radiiSmoothness_[i] == 1 || shapeRadii_[i] <= 0.0)
                 verticesSize += 1;
             else
-                verticesSize += radiiSmoothness[i];
+                verticesSize += radiiSmoothness_[i];
         }
         int indicesSize = (verticesSize - 2) * 3;
 
         // unpack Unity types containers
-        float[] anchorsX = new float[shapeAnchors.Length];
-        float[] anchorsY = new float[shapeAnchors.Length];
+        float[] anchorsX = new float[shapeAnchors_.Length];
+        float[] anchorsY = new float[shapeAnchors_.Length];
         for (int i = 0; i < anchorsSize; ++i)
         {
-            anchorsX[i] = shapeAnchors[i].x;
-            anchorsY[i] = shapeAnchors[i].y;
+            anchorsX[i] = shapeAnchors_[i].x;
+            anchorsY[i] = shapeAnchors_[i].y;
         }
         float[] verticesX = new float[verticesSize];
         float[] verticesY = new float[verticesSize];
@@ -424,7 +736,7 @@ public class ShapeRenderer : MonoBehaviour
 
         // call DLL
         int result = 0;
-        result = ComputeShape1(anchorsX, anchorsY, shapeRadii, radiiSmoothness, anchorsSize, verticesX, verticesY, verticesSize, indices, indicesSize, u, v);
+        result = ComputeShape1(anchorsX, anchorsY, shapeRadii_, radiiSmoothness_, anchorsSize, verticesX, verticesY, verticesSize, indices, indicesSize, u, v);
 
         if (result == 1)
         {
@@ -463,7 +775,7 @@ public class ShapeRenderer : MonoBehaviour
     /// </summary>
     public void UpdateStrokeGeometry(Vector3[] vertices)
     {
-        if (stroke)
+        if (stroke_)
         {
             lr.loop = true;
             lr.useWorldSpace = false;
@@ -494,10 +806,10 @@ public class ShapeRenderer : MonoBehaviour
         {
             if (fillType_ != FillType.Custom)
             {
-                if (fillTexture != null)
+                if (fillTexture_ != null)
                 {
-                    mpb_fill.SetTexture("_MainTex", fillTexture);
-                    mpb_fill.SetVector("_TileOff", new Vector4(fillTextrueTiling.x, fillTextrueTiling.y, fillTextureOffset.x, fillTextureOffset.y));
+                    mpb_fill.SetTexture("_MainTex", fillTexture_);
+                    mpb_fill.SetVector("_TileOff", new Vector4(fillTextrueTiling_.x, fillTextrueTiling_.y, fillTextureOffset_.x, fillTextureOffset_.y));
                 }
                 else
                     mpb_fill.Clear();
@@ -505,25 +817,25 @@ public class ShapeRenderer : MonoBehaviour
                 if (fillType_ == FillType.Solid)
                 {
                     fillMaterial = Resources.Load("SR_FillLinearGradient") as Material;
-                    mpb_fill.SetColor("_Color1", fillColor1);
-                    mpb_fill.SetColor("_Color2", fillColor1);
+                    mpb_fill.SetColor("_Color1", fillColor1_);
+                    mpb_fill.SetColor("_Color2", fillColor1_);
                 }
                 else if (fillType_ == FillType.LinearGradient)
                 {
                     fillMaterial = Resources.Load("SR_FillLinearGradient") as Material;
-                    mpb_fill.SetColor("_Color1", fillColor1);
-                    mpb_fill.SetColor("_Color2", fillColor2);
+                    mpb_fill.SetColor("_Color1", fillColor1_);
+                    mpb_fill.SetColor("_Color2", fillColor2_);
                 }
                 else if (fillType_ == FillType.RadialGradient)
                 {
                     fillMaterial = Resources.Load("SR_FillRadialGradient") as Material;
-                    mpb_fill.SetColor("_Color1", fillColor1);
-                    mpb_fill.SetColor("_Color2", fillColor2);
+                    mpb_fill.SetColor("_Color1", fillColor1_);
+                    mpb_fill.SetColor("_Color2", fillColor2_);
 
                 }
                 mpb_fill.SetFloat("_Angle", fillAngle_);
-                mpb_fill.SetFloat("_Slider1", slider1);
-                mpb_fill.SetFloat("_Slider2", slider2);
+                mpb_fill.SetFloat("_Slider1", fillOffset1_);
+                mpb_fill.SetFloat("_Slider2", fillOffset2_);
                 mr.SetPropertyBlock(mpb_fill);
                 mr.sharedMaterial = fillMaterial;
             }
@@ -531,10 +843,8 @@ public class ShapeRenderer : MonoBehaviour
             {
                 mpb_fill.Clear();
                 mr.SetPropertyBlock(null);
-                mr.sharedMaterial = customFillMaterial;
+                mr.sharedMaterial = customFillMaterial_;
             }
-            mr.sortingLayerID = sortingLayer;
-            mr.sortingOrder = sortingOrder;
         }
         else
         {
@@ -547,35 +857,35 @@ public class ShapeRenderer : MonoBehaviour
     /// </summary>
     public void UpdateStrokeAppearance()
     {
-        if (stroke)
+        if (stroke_)
         {
-            if (strokeType != StrokeType.Custom)
+            if (strokeType_ != StrokeType.Custom)
             {
-                if (strokeTexture != null)
+                if (strokeTexture_ != null)
                 {
-                    mpb_stroke.SetTexture("_MainTex", strokeTexture);
+                    mpb_stroke.SetTexture("_MainTex", strokeTexture_);
                 }
                 else
                     mpb_stroke.Clear();
                 
-                if (strokeType == StrokeType.Solid)
+                if (strokeType_ == StrokeType.Solid)
                 {
                     GradientColorKey[] gck = new GradientColorKey[2];
                     GradientAlphaKey[] gak = new GradientAlphaKey[2];
 
-                    gck[0].color = strokeSolid; gck[0].time = 0.0f;
-                    gck[1].color = strokeSolid; gck[1].time = 1.0f;
-                    gak[0].alpha = strokeSolid.a; gak[0].time = 0.0f;
-                    gak[1].alpha = strokeSolid.a; gak[1].time = 1.0f;
+                    gck[0].color = strokeSolid_; gck[0].time = 0.0f;
+                    gck[1].color = strokeSolid_; gck[1].time = 1.0f;
+                    gak[0].alpha = strokeSolid_.a; gak[0].time = 0.0f;
+                    gak[1].alpha = strokeSolid_.a; gak[1].time = 1.0f;
 
                     Gradient g = new Gradient();
                     g.SetKeys(gck, gak);
 
                     lr.colorGradient = g;
                 } 
-                else if (strokeType == StrokeType.MultiGradient)
+                else if (strokeType_ == StrokeType.MultiGradient)
                 {
-                    lr.colorGradient = strokeColor;
+                    lr.colorGradient = strokeGradient_;
                 }
                 lr.SetPropertyBlock(mpb_stroke);
                 strokeMaterial = Resources.Load("SR_Stroke") as Material;
@@ -585,12 +895,10 @@ public class ShapeRenderer : MonoBehaviour
             {
                 mpb_stroke.Clear();
                 lr.SetPropertyBlock(null);
-                lr.sharedMaterial = customStrokeMaterial;
+                lr.sharedMaterial = customStrokeMaterial_;
             }
-            lr.startWidth = strokeWidth;
-            lr.endWidth = strokeWidth;
-            lr.sortingLayerID = sortingLayer;
-            lr.sortingOrder = sortingOrder + 1;
+            lr.startWidth = strokeWidth_;
+            lr.endWidth = strokeWidth_;
         }
     }
 
@@ -599,18 +907,18 @@ public class ShapeRenderer : MonoBehaviour
     /// </summary>
     public void UpdateCollider(Vector3[] vertices)
     {
-        if (colliderMode == ColliderMode.ToCollider)
+        if (colliderMode_ == ColliderMode.ToCollider)
         {
             if (pc2d == null)
                 pc2d = gameObject.AddComponent<PolygonCollider2D>() as PolygonCollider2D;
-            if (setColliderTo == SetColliderTo.Anchors)
-                pc2d.points = shapeAnchors;
-            if (setColliderTo == SetColliderTo.Vertices)
+            if (setColliderTo_ == SetColliderTo.Anchors)
+                pc2d.points = shapeAnchors_;
+            if (setColliderTo_ == SetColliderTo.Vertices)
             {                
                 pc2d.points = System.Array.ConvertAll<Vector3, Vector2>(vertices, Vector3toVector2);
             }
         }
-        else if (colliderMode == ColliderMode.FromCollider)
+        else if (colliderMode_ == ColliderMode.FromCollider)
         {
             if (pc2d == null)
             {
@@ -619,13 +927,21 @@ public class ShapeRenderer : MonoBehaviour
             }
             else
             {
-                shapeAnchors = pc2d.points;
+                shapeAnchors_ = pc2d.points;
                 for (int i = 0; i < pc2d.points.Length; i++)
                 {
-                    shapeAnchors[i] += pc2d.offset;
+                    shapeAnchors_[i] += pc2d.offset;
                 }
             }
         }
+    }
+
+    private void UpdateSortingLayer()
+    {
+        mr.sortingLayerID = sortingLayer_;
+        mr.sortingOrder = sortingOrder_;
+        lr.sortingLayerID = sortingLayer_;
+        lr.sortingOrder = sortingOrder_ + 1;
     }
 
     //-------------------------------------------------------------------------
