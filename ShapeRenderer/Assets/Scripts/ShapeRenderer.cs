@@ -21,9 +21,8 @@ public class ShapeRenderer : MonoBehaviour
     public enum FillType { Solid, LinearGradient, RadialGradient, Custom };
 
     [SerializeField]
-    [Tooltip("Enables/disables shape fill.")]
     private bool fill_ = true;
-    public  bool fill
+    public bool fill
     {
         get { return fill_; }
         set
@@ -37,9 +36,8 @@ public class ShapeRenderer : MonoBehaviour
     }
 
     [SerializeField]
-    [Tooltip("The fill type to use.")]
     private FillType fillType_ = FillType.Solid;
-    public  FillType fillType
+    public FillType fillType
     {
         get { return fillType_; }
         set
@@ -53,9 +51,8 @@ public class ShapeRenderer : MonoBehaviour
     }
 
     [SerializeField]
-    [Tooltip("The fill color of the shape.")]
     private Color fillColor1_ = Color.white;
-    public  Color fillColor1
+    public Color fillColor1
     {
         get { return fillColor1_; }
         set
@@ -69,9 +66,8 @@ public class ShapeRenderer : MonoBehaviour
     }
 
     [SerializeField]
-    [Tooltip("The second fill color of the shape.")]
     private Color fillColor2_ = Color.black;
-    public  Color fillColor2
+    public Color fillColor2
     {
         get { return fillColor2_; }
         set
@@ -85,7 +81,6 @@ public class ShapeRenderer : MonoBehaviour
     }
 
     [SerializeField]
-    [Tooltip("The angle at which the linear gradient is applied.")]
     [Range(0.0f, 360.0f)]
     private float fillAngle_;
     public float fillAngle
@@ -102,7 +97,6 @@ public class ShapeRenderer : MonoBehaviour
     }
 
     [SerializeField]
-    [Tooltip("Controls the position of the gradient along its axis axis.")]
     [Range(-1.0f, 1.0f)]
     private float fillOffset1_ = 0.0f;
     public float fillOffset1
@@ -119,10 +113,9 @@ public class ShapeRenderer : MonoBehaviour
     }
 
     [SerializeField]
-    [Tooltip("Controls the position of the gradient along its second axis.")]
     [Range(-1.0f, 1.0f)]
     private float fillOffset2_ = 0.0f;
-    public  float fillOffset2
+    public float fillOffset2
     {
         get { return fillOffset2_; }
         set
@@ -136,7 +129,6 @@ public class ShapeRenderer : MonoBehaviour
     }
 
     [SerializeField]
-    [Tooltip("Texture to be applied to the fill (multiply).")]
     private Texture fillTexture_;
     public Texture fillTexture
     {
@@ -152,7 +144,6 @@ public class ShapeRenderer : MonoBehaviour
     }
 
     [SerializeField]
-    [Tooltip("Texture tiling in X and Y directions.")]
     private Vector2 fillTextrueTiling_ = Vector2.one;
     public Vector2 fillTextrueTiling
     {
@@ -168,7 +159,6 @@ public class ShapeRenderer : MonoBehaviour
     }
 
     [SerializeField]
-    [Tooltip("Texture offset in X and Y directions.")]
     private Vector2 fillTextureOffset_ = Vector2.zero;
     public Vector2 fillTextureOffset
     {
@@ -185,7 +175,6 @@ public class ShapeRenderer : MonoBehaviour
 
 
     [SerializeField]
-    [Tooltip("Custom material to be applied to the fill.")]
     private Material customFillMaterial_;
     public Material customFillMaterial
     {
@@ -209,7 +198,6 @@ public class ShapeRenderer : MonoBehaviour
     public enum StrokeType { Solid, MultiGradient, Custom };
 
     [SerializeField]
-    [Tooltip("Enables/disables shape stroke.")]
     private bool stroke_ = false;
     public bool stroke
     {
@@ -225,7 +213,6 @@ public class ShapeRenderer : MonoBehaviour
     }
 
     [SerializeField]
-    [Tooltip("The stroke type to use.")]
     private StrokeType strokeType_ = StrokeType.Solid;
     public StrokeType strokeType
     {
@@ -241,7 +228,6 @@ public class ShapeRenderer : MonoBehaviour
     }
 
     [SerializeField]
-    [Tooltip("The solid color used along the stroke.")]
     private Color strokeSolid_ = Color.black;
     public Color strokeSolid
     {
@@ -257,7 +243,6 @@ public class ShapeRenderer : MonoBehaviour
     }
 
     [SerializeField]
-    [Tooltip("The gradient describing the color along the stroke.")]
     private Gradient strokeGradient_;
     public Gradient strokeGradient
     {
@@ -273,7 +258,6 @@ public class ShapeRenderer : MonoBehaviour
     }
 
     [SerializeField]
-    [Tooltip("The shape stroke width in world units.")]
     private float strokeWidth_ = 10;
     public float strokeWidth
     {
@@ -325,7 +309,6 @@ public class ShapeRenderer : MonoBehaviour
     //-------------------------------------------------------------------------
 
     [SerializeField]
-    [Tooltip("The shape anchor points in world units, relative to this GameObject's transform.")]
     private Vector2[] shapeAnchors_ = new Vector2[4] { new Vector2(100, -100), new Vector2(100, 100), new Vector2(-100, 100), new Vector2(-100, -100) };
     public Vector2[] shapeAnchors
     {
@@ -342,7 +325,6 @@ public class ShapeRenderer : MonoBehaviour
 
 
     [SerializeField]
-    [Tooltip("The radii, in world units, applied to corresponding shape anchor points.")]
     private float[] shapeRadii_ = new float[4] { 0f, 0f, 0f, 0f };
     public float[] shapeRadii
     {
@@ -358,7 +340,6 @@ public class ShapeRenderer : MonoBehaviour
     }
 
     [SerializeField]
-    [Tooltip("The number of line segment used to render each radius. Use as few as necessary for best performance.")]
     private int[] radiiSmoothness_ = new int[4] { 50, 50, 50, 50 };
     public int[] radiiSmoothness
     {
@@ -373,14 +354,59 @@ public class ShapeRenderer : MonoBehaviour
         }
     }
 
-    private int defaultSmoothness = 50;
+    [SerializeField]
+    [Range(0.0f, 360.0f)]
+    private float rotation_ = 0.0f;
+    public float rotation
+    {
+        get { return rotation_; }
+        set
+        {
+            if (rotation_ != value)
+            {
+                rotation_ = value;
+                updateGeometry = true;
+            }
+        }
+    }
+
+    [SerializeField]
+    private bool mirrorX_ = false;
+    public bool mirrorX
+    {
+        get { return mirrorX_; }
+        set
+        {
+            if (mirrorX_ != value)
+            {
+                mirrorX_ = value;
+                updateGeometry = true;
+            }
+        }
+    }
+
+    [SerializeField]
+    private bool mirrorY_ = false;
+    public bool mirrorY
+    {
+        get { return mirrorY_; }
+        set
+        {
+            if (mirrorY_ != value)
+            {
+                mirrorY_ = value;
+                updateGeometry = true;
+            }
+        }
+    }
+
+    private int defaultSmoothness = 10;
 
     //-------------------------------------------------------------------------
     // SORTING LAYERS
     //-------------------------------------------------------------------------
 
     [SerializeField]
-    [Tooltip("The name of the ShapeRenderer's sorting layer. First add the desired sorting layer Unity's Layers dialog (top-right), then type it here.")]
     [SortingLayer]
     private int sortingLayer_ = 0;
     public int sortingLayer
@@ -394,10 +420,9 @@ public class ShapeRenderer : MonoBehaviour
                 updateSortingLayer = true;
             }
         }
-    }    
+    }
 
     [SerializeField]
-    [Tooltip("The ShapeRenderer's order within a sorting layer.")]
     private int sortingOrder_ = 0;
     public int sortingOrder
     {
@@ -420,7 +445,6 @@ public class ShapeRenderer : MonoBehaviour
     public enum SetColliderTo { Anchors, Vertices }
 
     [SerializeField]
-    [Tooltip("Updates the attached PolygonCollider2D to match the shape geometry. Adds a new PolygonCollider2D if none exists.")]
     private ColliderMode colliderMode_ = ColliderMode.Disabled;
     public ColliderMode colliderMode
     {
@@ -430,7 +454,6 @@ public class ShapeRenderer : MonoBehaviour
             if (colliderMode_ != value)
             {
                 colliderMode_ = value;
-                updateCollider = true;
             }
         }
     }
@@ -445,13 +468,11 @@ public class ShapeRenderer : MonoBehaviour
             if (setColliderTo_ != value)
             {
                 setColliderTo_ = value;
-                updateCollider = true;
             }
         }
     }
 
     [SerializeField]
-    [Tooltip("Shows/hides the LineRenderer, MeshFilter, and MeshRenderer required by this ShapeRenderer in the Inspector. Hidden by default to reduce clutter.")]
     private bool showComponents_ = false;
     public bool showComponents
     {
@@ -474,7 +495,6 @@ public class ShapeRenderer : MonoBehaviour
     private bool updateFill = false;
     private bool updateStroke = false;
     private bool updateSortingLayer = false;
-    private bool updateCollider = false;
 
     //-------------------------------------------------------------------------
     // COMPONENET HANDLES
@@ -526,8 +546,14 @@ public class ShapeRenderer : MonoBehaviour
         #if UNITY_EDITOR
         ShowComponenets();
         if (!EditorApplication.isPlaying)
-            UpdateShapeAll(); // we don't want to call this every frame when the game is playing in the editor
+            UpdateShapeAll(); 
         #endif
+
+        if (colliderMode_ == ColliderMode.FromCollider)
+        {
+            FromCollider();
+            updateGeometry = true;
+        }
 
         if (updateGeometry)
         {
@@ -543,10 +569,6 @@ public class ShapeRenderer : MonoBehaviour
         {
             UpdateStrokeAppearance();
             updateStroke = false;
-        }
-        if (updateCollider)
-        {
-
         }
         if (updateSortingLayer)
         {
@@ -708,8 +730,24 @@ public class ShapeRenderer : MonoBehaviour
     {
         ValidateValues();
 
+        // rotate
+        Vector2[] shapeAnchorsTransform = new Vector2[shapeAnchors_.Length];
+        Array.Copy(shapeAnchors_, shapeAnchorsTransform, shapeAnchors.Length);
+
+        if (rotation_ != 0)
+            shapeAnchorsTransform = RotateVertices(shapeAnchorsTransform, rotation_);
+
+        // mirror
+        if (mirrorX_)
+            for (int i = 0; i < shapeAnchorsTransform.Length; ++i)
+                shapeAnchorsTransform[i].x *= -1;
+
+        if (mirrorY_)
+            for (int i = 0; i < shapeAnchorsTransform.Length; ++i)
+                shapeAnchorsTransform[i].y *= -1;
+
         // calculate sizes
-        int anchorsSize = shapeAnchors_.Length;
+        int anchorsSize = shapeAnchorsTransform.Length;
         int verticesSize = 0;
         for (int i = 0; i < anchorsSize; i++)
         {
@@ -721,18 +759,20 @@ public class ShapeRenderer : MonoBehaviour
         int indicesSize = (verticesSize - 2) * 3;
 
         // unpack Unity types containers
-        float[] anchorsX = new float[shapeAnchors_.Length];
-        float[] anchorsY = new float[shapeAnchors_.Length];
+        float[] anchorsX = new float[shapeAnchorsTransform.Length];
+        float[] anchorsY = new float[shapeAnchorsTransform.Length];
         for (int i = 0; i < anchorsSize; ++i)
         {
-            anchorsX[i] = shapeAnchors_[i].x;
-            anchorsY[i] = shapeAnchors_[i].y;
+            anchorsX[i] = shapeAnchorsTransform[i].x;
+            anchorsY[i] = shapeAnchorsTransform[i].y;
         }
         float[] verticesX = new float[verticesSize];
         float[] verticesY = new float[verticesSize];
         float[] u = new float[verticesSize];
         float[] v = new float[verticesSize];
         int[] indices = new int[indicesSize];
+
+
 
         // call DLL
         int result = 0;
@@ -751,7 +791,7 @@ public class ShapeRenderer : MonoBehaviour
             }
             UpdateFillGeometry(vertices, indices, uv);
             UpdateStrokeGeometry(vertices);
-            UpdateCollider(vertices);
+            ToCollider(shapeAnchorsTransform, vertices);
         }
     }
 
@@ -902,28 +942,31 @@ public class ShapeRenderer : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Updates the attached PolygonCollider2D points if updateCollider is true. If no PC2D is attached, a new instance is created.
-    /// </summary>
-    public void UpdateCollider(Vector3[] vertices)
+    public void ToCollider(Vector2[] anchors, Vector3[] vertices)
     {
         if (colliderMode_ == ColliderMode.ToCollider)
         {
             if (pc2d == null)
                 pc2d = gameObject.AddComponent<PolygonCollider2D>() as PolygonCollider2D;
             if (setColliderTo_ == SetColliderTo.Anchors)
-                pc2d.points = shapeAnchors_;
+                pc2d.points = anchors;
             if (setColliderTo_ == SetColliderTo.Vertices)
-            {                
+            {
                 pc2d.points = System.Array.ConvertAll<Vector3, Vector2>(vertices, Vector3toVector2);
             }
         }
-        else if (colliderMode_ == ColliderMode.FromCollider)
+    }
+
+    /// <summary>
+    /// Updates the attached PolygonCollider2D points if updateCollider is true. If no PC2D is attached, a new instance is created.
+    /// </summary>
+    public void FromCollider()
+    {
+        if (colliderMode_ == ColliderMode.FromCollider)
         {
             if (pc2d == null)
             {
                 pc2d = gameObject.AddComponent<PolygonCollider2D>() as PolygonCollider2D;
-                pc2d.points = System.Array.ConvertAll<Vector3, Vector2>(vertices, Vector3toVector2);
             }
             else
             {
@@ -972,6 +1015,19 @@ public class ShapeRenderer : MonoBehaviour
             vertices[i] = RotateVector2(vertices[i], degrees);
         }
         return vertices;
+    }
+
+    public static float[] LinSpace(float a, float b, int n)
+    {
+        float[] linspace = new float[n];
+        float delta = (b - a) / (n - 1);
+
+        linspace[0] = a;
+        for (int i = 1; i < n - 1; i++)
+            linspace[i] = linspace[i - 1] + delta;
+
+        linspace[n - 1] = b;
+        return linspace;
     }
 
 }
