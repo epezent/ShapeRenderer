@@ -12,6 +12,7 @@ using UnityEditor;
 // 08/2017
 
 [ExecuteInEditMode]
+[DisallowMultipleComponent]
 public class ShapeRenderer : MonoBehaviour
 {
     //-------------------------------------------------------------------------
@@ -198,7 +199,7 @@ public class ShapeRenderer : MonoBehaviour
     public enum StrokeType { Solid, MultiGradient, Custom };
 
     [SerializeField]
-    private bool stroke_ = false;
+    private bool stroke_ = true;
     public bool stroke
     {
         get { return stroke_; }
@@ -505,7 +506,9 @@ public class ShapeRenderer : MonoBehaviour
     private MeshRenderer mr;
     private MaterialPropertyBlock mpb_fill;
     private MaterialPropertyBlock mpb_stroke;
-    private PolygonCollider2D pc2d;   
+    private PolygonCollider2D pc2d;
+
+    public Shape shape;
 
     //-------------------------------------------------------------------------
     // MONOBEHAVIOR CALLBACKS
@@ -541,13 +544,17 @@ public class ShapeRenderer : MonoBehaviour
         UpdateShapeAll();
     }
 
-    void Update()
+    public void Update()
     {
         #if UNITY_EDITOR
-        ShowComponenets();
         if (!EditorApplication.isPlaying)
             UpdateShapeAll(); 
         #endif
+
+        ShowComponenets();
+
+        if (shape != null)
+            shape.Draw();
 
         if (colliderMode_ == ColliderMode.FromCollider)
         {

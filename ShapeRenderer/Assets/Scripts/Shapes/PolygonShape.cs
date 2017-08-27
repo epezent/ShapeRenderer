@@ -67,6 +67,7 @@ public class PolygonShape : MonoBehaviour {
         sr.shapeAnchors = shapeAnchors;
         sr.shapeRadii = shapeRadii;
         sr.radiiSmoothness = radiiSmoothness;
+        sr.Update();
     }    
     
 }
