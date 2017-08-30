@@ -5,41 +5,21 @@ using UnityEngine;
 // Evan Pezent | evanpezent.com | epezent@rice.edu
 // 08/2017
 
-[RequireComponent(typeof(ShapeRenderer))]
-[ExecuteInEditMode]
-public class StarShape : MonoBehaviour {
+public class StarShape : Shape {
 
-    [Header("Shape Properties")]
     [Range(2,25)]
     public int points = 5;
     public float radiusA = 100;
     public float radiusB = 50;
-    [Range(0.0f, 360.0f)]
-    public float rotation = 0f;
     public float cornerRadiusA = 0;
     public float cornerRadiusB = 0;
     [Range(3, 100)]
     public int smoothness = 50;
 
-    // ShapeRenderer Component
-    private ShapeRenderer sr;
-
-    // Use this for initialization
-    void Start () {
-        sr = GetComponent<ShapeRenderer>();
-        DrawShape();
-	}
-	
-	// Update is called once per frame
-	void Update () {
-        DrawShape();
-	}
-
-    // Updates the ShapeRender Mesh with the shape geometry
-    void DrawShape()
+    public override void Draw()
     {
         float angleIncrement =  Mathf.PI / points;
-        float offset = Mathf.Deg2Rad * rotation + Mathf.PI * 0.5f;
+        float offset = Mathf.PI * 0.5f;
         Vector2[] shapeAnchors = new Vector2[2 * points];
         float[] shapeRadii = new float[2 * points];
         int[] radiiSmoothness = new int[2 * points];

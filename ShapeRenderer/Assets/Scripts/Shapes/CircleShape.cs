@@ -5,30 +5,13 @@ using UnityEngine;
 // Evan Pezent | evanpezent.com | epezent@rice.edu
 // 08/2017
 
-[RequireComponent(typeof(ShapeRenderer))]
-[ExecuteInEditMode]
-public class CircleShape : MonoBehaviour {
+public class CircleShape : Shape {
 
-    [Header("Shape Properties")]
     public float radius = 100;
     [Range(3, 100)]
-    public int smoothness = 50;
+    public int smoothness = 25;
 
-    // ShapeRenderer Component
-    private ShapeRenderer sr;
-
-    // Use this for initialization
-    void Start () {
-        sr = GetComponent<ShapeRenderer>();
-        DrawShape();
-	}
-	
-	// Update is called once per frame
-	void Update () {
-        DrawShape();
-	}
-    // Updates the ShapeRender Mesh with the shape geometry
-    void DrawShape()
+    public override void Draw()
     {
         float angleIncrement = 2 * Mathf.PI / smoothness;
         Vector2[] shapeAnchors = new Vector2[smoothness];

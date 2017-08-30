@@ -67,7 +67,7 @@ public class ShapeRenderer : MonoBehaviour
     }
 
     [SerializeField]
-    private Color fillColor2_ = Color.black;
+    private Color fillColor2_ = Color.gray;
     public Color fillColor2
     {
         get { return fillColor2_; }
@@ -83,7 +83,7 @@ public class ShapeRenderer : MonoBehaviour
 
     [SerializeField]
     [Range(0.0f, 360.0f)]
-    private float fillAngle_;
+    private float fillAngle_ = 0.0f;
     public float fillAngle
     {
         get { return fillAngle_; }
@@ -176,7 +176,7 @@ public class ShapeRenderer : MonoBehaviour
 
 
     [SerializeField]
-    private Material customFillMaterial_;
+    private Material customFillMaterial_ = null;
     public Material customFillMaterial
     {
         get { return customFillMaterial_; }
@@ -401,7 +401,7 @@ public class ShapeRenderer : MonoBehaviour
         }
     }
 
-    private int defaultSmoothness = 10;
+    private int defaultSmoothness = 25;
 
     //-------------------------------------------------------------------------
     // SORTING LAYERS
@@ -483,7 +483,7 @@ public class ShapeRenderer : MonoBehaviour
             if (showComponents_ != value)
             {
                 showComponents_ = value;
-                ShowComponenets();
+                ShowComponenets(value);
             }
         }
     }
@@ -507,14 +507,13 @@ public class ShapeRenderer : MonoBehaviour
     private MaterialPropertyBlock mpb_fill;
     private MaterialPropertyBlock mpb_stroke;
     private PolygonCollider2D pc2d;
-
     public Shape shape;
 
     //-------------------------------------------------------------------------
     // MONOBEHAVIOR CALLBACKS
     //-------------------------------------------------------------------------
-
-    void Awake()
+   
+    private void Start()
     {
         // Add required Unity components and check ranges
         ValidateComponents();
@@ -536,37 +535,32 @@ public class ShapeRenderer : MonoBehaviour
         mr.sortingOrder = sortingOrder_;
 
         // Show/Hide required components
-        ShowComponenets();
-    }
-    
-    private void Start()
-    {
+        ShowComponenets(showComponents_);
+
         UpdateShapeAll();
     }
 
-    public void Update()
+    private void Update()
     {
         #if UNITY_EDITOR
         if (!EditorApplication.isPlaying)
             UpdateShapeAll(); 
         #endif
 
-        ShowComponenets();
+        ShowComponenets(showComponents_);
 
+        // check for any Shapes and draw them
         if (shape != null)
             shape.Draw();
 
+        // check if in FromCollider mode
         if (colliderMode_ == ColliderMode.FromCollider)
         {
             FromCollider();
             updateGeometry = true;
         }
 
-        if (updateGeometry)
-        {
-            UpdateShapeGeometry();
-            updateGeometry = false;
-        }
+        // update fill, stroke, geometry, and sorting layer if flagged
         if (updateFill)
         {
             UpdateFillAppearance();
@@ -577,6 +571,11 @@ public class ShapeRenderer : MonoBehaviour
             UpdateStrokeAppearance();
             updateStroke = false;
         }
+        if (updateGeometry)
+        {
+            UpdateShapeGeometry();
+            updateGeometry = false;
+        }
         if (updateSortingLayer)
         {
             UpdateSortingLayer();
@@ -585,12 +584,15 @@ public class ShapeRenderer : MonoBehaviour
 
     }
 
+    // Called when the script is enabled (checked) in the inspector
     private void OnEnable()
     {
+        ValidateComponents();
         mr.enabled = fill_;
         lr.enabled = stroke_;
     }
 
+    // Calledd when the script is disabled (unchecked) in the inspector
     private void OnDisable()
     {
         mr.enabled = false;
@@ -598,10 +600,16 @@ public class ShapeRenderer : MonoBehaviour
     }
 
     // Called when script added or inspector element is changed (in editor only)
-    public void OnValidate()
+    private void OnValidate()
     {
         ValidateComponents();
         ValidateValues();
+    }
+
+    // Called when the script is removed/destroyed or GameObject is destroyed
+    private void OnDestroy()
+    {
+        ShowComponenets(true);
     }
 
     //-------------------------------------------------------------------------
@@ -609,20 +617,9 @@ public class ShapeRenderer : MonoBehaviour
     //-------------------------------------------------------------------------
 
     [DllImport("ShapeRenderer", EntryPoint = "compute_shape1")]
-    private static extern int ComputeShape1(float[] anchorsX, float[] anchorsY, float[] radii, int[] N, int anchorsSize,
+    private static extern int ComputeShape(float[] anchorsX, float[] anchorsY, float[] radii, int[] N, int anchorsSize,
                                          float[] verticesX, float[] verticesY, int verticesSize,
                                          int[] indices, int indicesSize, float[] u, float[] v);
-
-    [DllImport("ShapeRenderer", EntryPoint = "compute_shape2")]
-    private static extern int ComputeShape2(float[] anchorsX, float[] anchorsY, float[] radii, int[] N, int anchorsSize,
-                                         float[] verticesX, float[] verticesY, int verticesSize,
-                                         int[] indices, int indicesSize, float[] u, float[] v);
-
-    //-------------------------------------------------------------------------
-    // PUBLIC FUNCTIONS
-    //-------------------------------------------------------------------------
-
-
 
     //-------------------------------------------------------------------------
     // PRIVATE FUNCTIONS
@@ -639,6 +636,12 @@ public class ShapeRenderer : MonoBehaviour
         if (mf == null)
         {
             mf = gameObject.AddComponent<MeshFilter>() as MeshFilter;
+            mf.sharedMesh = new Mesh();
+            mf.sharedMesh.MarkDynamic();
+        }
+        // validate mesh
+        if (mf.sharedMesh == null)
+        {
             mf.sharedMesh = new Mesh();
             mf.sharedMesh.MarkDynamic();
         }
@@ -684,9 +687,9 @@ public class ShapeRenderer : MonoBehaviour
     /// <summary>
     /// Shows or hides required components in the inspector
     /// </summary>
-    private void ShowComponenets()
+    private void ShowComponenets(bool show)
     {
-        if (showComponents_)
+        if (show)
         {
             mr.hideFlags = HideFlags.None;
             mf.hideFlags = HideFlags.None;
@@ -783,7 +786,7 @@ public class ShapeRenderer : MonoBehaviour
 
         // call DLL
         int result = 0;
-        result = ComputeShape1(anchorsX, anchorsY, shapeRadii_, radiiSmoothness_, anchorsSize, verticesX, verticesY, verticesSize, indices, indicesSize, u, v);
+        result = ComputeShape(anchorsX, anchorsY, shapeRadii_, radiiSmoothness_, anchorsSize, verticesX, verticesY, verticesSize, indices, indicesSize, u, v);
 
         if (result == 1)
         {
@@ -991,7 +994,7 @@ public class ShapeRenderer : MonoBehaviour
         mr.sortingLayerID = sortingLayer_;
         mr.sortingOrder = sortingOrder_;
         lr.sortingLayerID = sortingLayer_;
-        lr.sortingOrder = sortingOrder_ + 1;
+        lr.sortingOrder = sortingOrder_;
     }
 
     //-------------------------------------------------------------------------

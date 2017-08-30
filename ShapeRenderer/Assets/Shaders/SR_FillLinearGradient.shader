@@ -97,15 +97,16 @@ Shader "ShapeRenderer/FillLinearGradient"
                 float t = x * sin(angle) + y * cos(angle) + 0.5;
                 // t = t - (1 - (_Slider + 1) * 0.5) + 0.5;
 
-                float4 color = float4(0.0,0.0,0.0,1.0);
-                color.r = (_Color1.r - _Color2.r) * t + _Color2.r;
-                color.g = (_Color1.g - _Color2.g) * t + _Color2.g;
-                color.b = (_Color1.b - _Color2.b) * t + _Color2.b;
-                color.a = (_Color1.a - _Color2.a) * t + _Color2.a;
+                float4 A = float4(0.0,0.0,0.0,1.0);
+                A.r = (_Color1.r - _Color2.r) * t + _Color2.r;
+                A.g = (_Color1.g - _Color2.g) * t + _Color2.g;
+                A.b = (_Color1.b - _Color2.b) * t + _Color2.b;
+                A.a = (_Color1.a - _Color2.a) * t + _Color2.a;
 
-                color *= SampleTexture(input.uv *_TileOff.xy + _TileOff.zw);
+                float4 B = SampleTexture(input.uv *_TileOff.xy + _TileOff.zw);
 
-                return color;
+                return A*B;              // MULTIPLY
+                //return 1 - (1 - A)*(1 - B); // SCREEN
             }
             ENDCG // END HLSL PROGRAM SNIPPET
         }

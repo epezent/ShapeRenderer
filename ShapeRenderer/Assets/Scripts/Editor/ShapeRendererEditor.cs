@@ -89,70 +89,84 @@ public class ShapeRendererEditor : Editor {
         EditorStyles.label.fontStyle = FontStyle.Bold;
         EditorGUILayout.PropertyField(fill, new GUIContent("Fill", "Enables/disables shape fill."));
         EditorStyles.label.fontStyle = FontStyle.Normal;
-        if (fill.boolValue == true)
-        {
-            EditorGUILayout.PropertyField(fillType, new GUIContent("Fill Type", "The fill type to use."));
-            if ((ShapeRenderer.FillType)fillType.enumValueIndex != ShapeRenderer.FillType.Custom)
-            {
-                if ((ShapeRenderer.FillType)fillType.enumValueIndex == ShapeRenderer.FillType.Solid)
-                {
-                    EditorGUILayout.PropertyField(fillColor1, new GUIContent("Fill Color", "The fill color of the shape."));
-                }
-                else if ((ShapeRenderer.FillType)fillType.enumValueIndex == ShapeRenderer.FillType.LinearGradient)
-                {
-                    EditorGUILayout.PropertyField(fillColor1, new GUIContent("Fill Color 1", "The frist fill color of the gradient."));
-                    EditorGUILayout.PropertyField(fillColor2, new GUIContent("Fill Color 2", "The second fill color of the gradient."));
-                    EditorGUILayout.PropertyField(fillAngle, new GUIContent("Fill Angle", "The angle at which the linear gradient is applied."));
 
-                }
-                else if ((ShapeRenderer.FillType)fillType.enumValueIndex == ShapeRenderer.FillType.RadialGradient)
-                {
-                    EditorGUILayout.PropertyField(fillColor1, new GUIContent("Fill Color 1", "The frist fill color of the gradient."));
-                    EditorGUILayout.PropertyField(fillColor2, new GUIContent("Fill Color 2", "The second fill color of the gradient."));
-                    EditorGUILayout.PropertyField(fillOffset1, new GUIContent("Offset X", "The position of the gradient along the X axis."));
-                    EditorGUILayout.PropertyField(fillOffset2, new GUIContent("Offset Y", "The position of the gradient along the Y axis."));
-                }
-                EditorGUILayout.PropertyField(fillTexture, new GUIContent("Fill Texture", "The texture to be appled to the fill."));
-                if ((Texture)fillTexture.objectReferenceValue != null)
-                {
-                    EditorGUILayout.PropertyField(fillTextrueTiling, new GUIContent("Tiling", "The texture tiling in X and Y directions."));
-                    EditorGUILayout.PropertyField(fillTextureOffset, new GUIContent("Offset", "The texture offset in X and Y directions."));
-                }
-            }
-            else
+        if (fill.boolValue == false)
+            GUI.enabled = false;
+        
+        EditorGUILayout.PropertyField(fillType, new GUIContent("Fill Type", "The fill type to use."));
+        if ((ShapeRenderer.FillType)fillType.enumValueIndex != ShapeRenderer.FillType.Custom)
+        {
+            if ((ShapeRenderer.FillType)fillType.enumValueIndex == ShapeRenderer.FillType.Solid)
             {
-                EditorGUILayout.PropertyField(customFillMaterial, new GUIContent("Fill Material", "The custom material to be applied to the fill."));
+                EditorGUILayout.PropertyField(fillColor1, new GUIContent("Fill Color", "The fill color of the shape."));
+            }
+            else if ((ShapeRenderer.FillType)fillType.enumValueIndex == ShapeRenderer.FillType.LinearGradient)
+            {
+                EditorGUILayout.PropertyField(fillColor1, new GUIContent("Fill Color 1", "The frist fill color of the gradient."));
+                EditorGUILayout.PropertyField(fillColor2, new GUIContent("Fill Color 2", "The second fill color of the gradient."));
+                EditorGUILayout.PropertyField(fillAngle, new GUIContent("Fill Angle", "The angle at which the linear gradient is applied."));
+
+            }
+            else if ((ShapeRenderer.FillType)fillType.enumValueIndex == ShapeRenderer.FillType.RadialGradient)
+            {
+                EditorGUILayout.PropertyField(fillColor1, new GUIContent("Fill Color 1", "The frist fill color of the gradient."));
+                EditorGUILayout.PropertyField(fillColor2, new GUIContent("Fill Color 2", "The second fill color of the gradient."));
+                EditorGUILayout.PropertyField(fillOffset1, new GUIContent("Offset X", "The position of the gradient along the X axis."));
+                EditorGUILayout.PropertyField(fillOffset2, new GUIContent("Offset Y", "The position of the gradient along the Y axis."));
+            }
+            EditorGUILayout.PropertyField(fillTexture, new GUIContent("Fill Texture", "The texture to be appled to the fill."));
+            if ((Texture)fillTexture.objectReferenceValue != null)
+            {
+                EditorGUILayout.PropertyField(fillTextrueTiling, new GUIContent("Tiling", "The texture tiling in X and Y directions."));
+                EditorGUILayout.PropertyField(fillTextureOffset, new GUIContent("Offset", "The texture offset in X and Y directions."));
             }
         }
+        else
+        {
+            EditorGUILayout.PropertyField(customFillMaterial, new GUIContent("Fill Material", "The custom material to be applied to the fill."));
+        }
+
+        if (fill.boolValue == false)
+            GUI.enabled = true;
+
 
         EditorStyles.label.fontStyle = FontStyle.Bold;
         EditorGUILayout.PropertyField(stroke, new GUIContent("Stroke", "Enables/disables shape stroke."));
         EditorStyles.label.fontStyle = FontStyle.Normal;
 
-        if (stroke.boolValue == true)
-        {
-            EditorGUILayout.PropertyField(strokeType, new GUIContent("Stroke Type", "The stroke type to use."));
-            if ((ShapeRenderer.StrokeType)strokeType.enumValueIndex != ShapeRenderer.StrokeType.Custom)
-            {
-                if ((ShapeRenderer.StrokeType)strokeType.enumValueIndex == ShapeRenderer.StrokeType.Solid)
-                    EditorGUILayout.PropertyField(strokeSolid, new GUIContent("Stroke Color", "The stroke color of the shape."));
-                else if ((ShapeRenderer.StrokeType)strokeType.enumValueIndex == ShapeRenderer.StrokeType.MultiGradient)
-                    EditorGUILayout.PropertyField(strokeGradient, new GUIContent("Stroke Gradient", "The gradient describing the color along the stroke."));
-                EditorGUILayout.PropertyField(strokeTexture, new GUIContent("Stroke Texture", "The texture to be applied to the stroke"));
-            }
-            else
-            {
-                EditorGUILayout.PropertyField(customStrokeMaterial, new GUIContent("Stroke Material", "The custom material to be applied to the stroke."));
-            }
-            EditorGUILayout.PropertyField(strokeWidth, new GUIContent("Stroke Width", "The shape stroke width in world units."));
+        if (stroke.boolValue == false)
+            GUI.enabled = false;
 
+        EditorGUILayout.PropertyField(strokeType, new GUIContent("Stroke Type", "The stroke type to use."));
+        if ((ShapeRenderer.StrokeType)strokeType.enumValueIndex != ShapeRenderer.StrokeType.Custom)
+        {
+            if ((ShapeRenderer.StrokeType)strokeType.enumValueIndex == ShapeRenderer.StrokeType.Solid)
+                EditorGUILayout.PropertyField(strokeSolid, new GUIContent("Stroke Color", "The stroke color of the shape."));
+            else if ((ShapeRenderer.StrokeType)strokeType.enumValueIndex == ShapeRenderer.StrokeType.MultiGradient)
+                EditorGUILayout.PropertyField(strokeGradient, new GUIContent("Stroke Gradient", "The gradient describing the color along the stroke."));
+            EditorGUILayout.PropertyField(strokeTexture, new GUIContent("Stroke Texture", "The texture to be applied to the stroke"));
         }
+        else
+        {
+            EditorGUILayout.PropertyField(customStrokeMaterial, new GUIContent("Stroke Material", "The custom material to be applied to the stroke."));
+        }
+        EditorGUILayout.PropertyField(strokeWidth, new GUIContent("Stroke Width", "The shape stroke width in world units."));
+
+        if (stroke.boolValue == false)
+            GUI.enabled = true;
 
         EditorGUILayout.LabelField("Geometry", EditorStyles.boldLabel);
+
+        if (((ShapeRenderer)target).shape != null)
+            GUI.enabled = false;
 
         EditorGUILayout.PropertyField(shapeAnchors, new GUIContent("Anchors", "The shape anchor points in world units, relative to this GameObject's transform."), true);
         EditorGUILayout.PropertyField(shapeRadiil, new GUIContent("Radii", "The radii, in world units, applied to corresponding shape anchor points."), true);
         EditorGUILayout.PropertyField(radiiSmoothness, new GUIContent("Smoothness", "The number of line segment used to render each radius. Use as few as necessary for best performance."), true);
+
+        if (((ShapeRenderer)target).shape != null)
+            GUI.enabled = true;
+
         EditorGUILayout.PropertyField(rotation, new GUIContent("Rotation", "The rotation applied to the shape in degrees."));
         EditorGUILayout.PropertyField(mirrorX, new GUIContent("Mirror X", "Mirror the shape from left to right."));
         EditorGUILayout.PropertyField(mirrorY, new GUIContent("Mirror Y", "Mirror the shape from bottom to top."));
