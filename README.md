@@ -42,7 +42,7 @@ This project was born out of my frustration with having to constantly reopen Pho
 ## Usage
 
 - clone or download this repo to you computer
-- use onE of the scenes in the [ShapeRenderer project folder](https://github.com/epezent/ShapeRenderer/tree/master/ShapeRenderer) as a starting point, or drag all of the files in [Assets](https://github.com/epezent/ShapeRenderer/tree/master/ShapeRenderer/Assets) to your own project
+- use one of the scenes in the [ShapeRenderer project folder](https://github.com/epezent/ShapeRenderer/tree/master/ShapeRenderer) as a starting point, or drag all of the files in [Assets](https://github.com/epezent/ShapeRenderer/tree/master/ShapeRenderer/Assets) to your own project
 - there are two options for creating a new shape
     1. attach the ShapeRenderer script to a GameObject
     2. attach one of the Shape primitive classes (e.g. CircleShape, SquareShape, etc.) to a GameObject
@@ -62,4 +62,5 @@ This project was born out of my frustration with having to constantly reopen Pho
 - functions for checking if points lie inside of shapes and detecting intersecting shapes
 - create composite shapes from multiple shapes using a parent/child structure
 - holes
+- multi-color linear gradient fill (mesh based)
 
