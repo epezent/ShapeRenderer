@@ -1,5 +1,7 @@
 # ShapeRenderer
 
+![ShapeRenderer](https://github.com/epezent/ShapeRenderer/blob/master/screenshot.png)
+
 ## Developers
 
 - [Evan Pezent](http://evanpezent.com) (epezent@rice.edu)
