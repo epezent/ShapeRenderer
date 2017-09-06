@@ -18,13 +18,13 @@ This project was born out of my frustration with having to constantly reopen Pho
 
 - create **concave/convex** shapes with an unlimited number of **anchor points**
 - apply **rounded corners** with adjustable radii and smoothness
+- rotate and mirror shapes
 - several built-in scripts for rapidly creating **primitives** such as Rectangles, Polygons, Triangles, Circles, Diamonds, and more
-- fast **C/C++ DLL** plugin handles heavy math and triangulation to keep framerates reasonably high during animation
 - multiple **Collider** options:
     - **To Collider** mode updates PolygonCollider2D points to match shape anchors or vertices
     - **From Collider** mode updates shape anchors to match PolygonCollider2D points
     - use the built-in PolygonCollider2D point editing tool to rapidly create shape geometry in From Collider mode
-- rotate and mirror shapes
+- fast **C/C++ DLL** plugin handles heavy math and triangulation to keep framerates reasonably high during animation
 
 ### Shape Appearance
 
