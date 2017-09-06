@@ -22,6 +22,7 @@ This project was born out of my frustration with having to constantly reopen Pho
     - **To Collider** mode updates PolygonCollider2D points to match shape anchors or vertices
     - **From Collider** mode updates shape anchors to match PolygonCollider2D points
     - use the built-in PolygonCollider2D point editing tool to rapidly create shape geometry in From Collider mode
+- rotate and mirror shapes
 
 ### Shape Appearance
 
@@ -40,14 +41,25 @@ This project was born out of my frustration with having to constantly reopen Pho
 
 ## Usage
 
-## How It Works
+- clone or download this repo to you computer
+- use onE of the scenes in the [ShapeRenderer project folder](https://github.com/epezent/ShapeRenderer/tree/master/ShapeRenderer) as a starting point, or drag all of the files in [Assets](https://github.com/epezent/ShapeRenderer/tree/master/ShapeRenderer/Assets) to your own project
+- there are two options for creating a new shape
+    1. attach the ShapeRenderer script to a GameObject
+    2. attach one of the Shape primitive classes (e.g. CircleShape, SquareShape, etc.) to a GameObject
+- use the options available in the inspector to make your shape look the way you want it to
+- alternatively, use the public properties of ShapeRenderer or the shape class to change the shape through scripting
 
 ## Known Issues/Quirks
 
 - Stroke width may or may not change in real-time while in Editor mode. It will, however, update correctly in Play mode. This seems to be an issue with Unity's built-in LineRenderer component.
 
-## Coming Soon
+## Coming Eventually (Maybe)
 
-- Multicolor Linear Gradient Fill
-- Rotation / Scaling
+- linear gradient offset/shifting
+- texture blend modes and opacity adjustment
+- shape scaling
+- options for inside and outside strokes
+- functions for checking if points lie inside of shapes and detecting intersecting shapes
+- create composite shapes from multiple shapes using a parent/child structure
+- holes
 
