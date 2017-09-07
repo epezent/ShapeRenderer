@@ -18,7 +18,7 @@ This project was born out of my frustration with having to constantly reopen Pho
 
 - create **concave/convex** shapes with an unlimited number of **anchor points**
 - apply **rounded corners** with adjustable radii and smoothness
-- rotate and mirror shapes
+- rotate, scale and mirror shapes without having to use the Transform component
 - several built-in scripts for rapidly creating **primitives** such as Rectangles, Polygons, Triangles, Circles, Diamonds, and more
 - multiple **Collider** options:
     - **To Collider** mode updates PolygonCollider2D points to match shape anchors or vertices
@@ -43,26 +43,30 @@ This project was born out of my frustration with having to constantly reopen Pho
 
 ## Usage
 
-- clone or download this repo to you computer
+**WARNING**: This package depends on a custom DLL plugin. The compiled [ShapeRenderer.dll](https://github.com/epezent/ShapeRenderer/tree/master/ShapeRenderer/Assets/Plugins) file provided in this repository was built for **win64** platforms. If you are developing on a different platform you will need to compile [ShapeRendererDLL C++ code](https://github.com/epezent/ShapeRenderer/tree/master/ShapeRendererDLL) yourself and move the resulting DLL to the [Plugins folder](https://github.com/epezent/ShapeRenderer/tree/master/ShapeRenderer/Assets/Plugins).
+
+- clone or download this repository to you computer
 - use one of the scenes in the [ShapeRenderer project folder](https://github.com/epezent/ShapeRenderer/tree/master/ShapeRenderer) as a starting point, or drag all of the files in [Assets](https://github.com/epezent/ShapeRenderer/tree/master/ShapeRenderer/Assets) to your own project
 - there are two options for creating a new shape
     1. attach the ShapeRenderer script to a GameObject
     2. attach one of the Shape primitive classes (e.g. CircleShape, SquareShape, etc.) to a GameObject
-- use the options available in the inspector to make your shape look the way you want it to
-- alternatively, use the public properties of ShapeRenderer or the shape class to change the shape through scripting
+- use the options available in the Inspector to make your shape look the way you want it to
+- alternatively, use the public properties of ShapeRenderer or the Shape class to change the shape through scripting
+- one last thing -- you can derive from the Shape class to make new and interesting shapes (and please consider contributing them if you do!)
 
 ## Known Issues/Quirks
 
-- Stroke width may or may not change in real-time while in Editor mode. It will, however, update correctly in Play mode. This seems to be an issue with Unity's built-in LineRenderer component.
+- Stroke width may or may not change in real-time while in Editor mode. It will, however, update correctly in Play mode. This seems to be an issue with Unity's built-in LineRenderer component. I'm still investigating.
 
 ## Coming Eventually (Maybe)
 
-- linear gradient offset/shifting
-- texture blend modes and opacity adjustment
-- shape scaling
-- options for inside and outside strokes
-- functions for checking if points lie inside of shapes and detecting intersecting shapes
-- create composite shapes from multiple shapes using a parent/child structure
-- holes
-- multi-color linear gradient fill (mesh based)
+In order of most likely to least likely, these are some things I may eventually add to ShapeRender (feel free to make contributions toward any!):
 
+- texture blend modes and opacity adjustment
+- linear gradient offset/shifting
+- functions for checking if points lie inside of shapes and detecting intersecting shapes
+- GUI support
+- multi-color linear gradient fill (mesh vertex-color based)
+- options for inside and outside strokes
+- ability to create composite shapes from multiple shapes using Unity's parent/child structure
+- holes in shapes

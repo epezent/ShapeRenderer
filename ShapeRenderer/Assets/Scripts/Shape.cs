@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditorInternal;
 
+// Evan Pezent | evanpezent.com | epezent@rice.edu
+// 09/2017
+
 [ExecuteInEditMode]
 [DisallowMultipleComponent]
 public class Shape : MonoBehaviour {

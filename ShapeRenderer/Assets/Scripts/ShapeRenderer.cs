@@ -324,7 +324,6 @@ public class ShapeRenderer : MonoBehaviour
         }
     }
 
-
     [SerializeField]
     private float[] shapeRadii_ = new float[4] { 0f, 0f, 0f, 0f };
     public float[] shapeRadii
@@ -366,6 +365,21 @@ public class ShapeRenderer : MonoBehaviour
             if (rotation_ != value)
             {
                 rotation_ = value;
+                updateGeometry = true;
+            }
+        }
+    }
+
+    [SerializeField]
+    private Vector2 scale_ = Vector2.one;
+    public Vector2 scale
+    {
+        get { return scale_; }
+        set
+        {
+            if (scale_ != value)
+            {
+                scale_ = value;
                 updateGeometry = true;
             }
         }
@@ -684,9 +698,6 @@ public class ShapeRenderer : MonoBehaviour
             strokeWidth_ = 0;
     }
 
-    /// <summary>
-    /// Shows or hides required components in the inspector
-    /// </summary>
     private void ShowComponenets(bool show)
     {
         if (show)
@@ -703,9 +714,6 @@ public class ShapeRenderer : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Enables/disables certains components depending on what shape options have been selected.
-    /// </summary>
     private void UpdateEnabled()
     {
         if (fill_)
@@ -747,10 +755,17 @@ public class ShapeRenderer : MonoBehaviour
         if (rotation_ != 0)
             shapeAnchorsTransform = RotateVertices(shapeAnchorsTransform, rotation_);
 
+        // scale
+        for (int i = 0; i < shapeAnchorsTransform.Length; ++i)
+        {
+            shapeAnchorsTransform[i].x *= scale_.x;
+            shapeAnchorsTransform[i].y *= scale_.y;            
+        }
+
         // mirror
         if (mirrorX_)
-            for (int i = 0; i < shapeAnchorsTransform.Length; ++i)
-                shapeAnchorsTransform[i].x *= -1;
+        for (int i = 0; i < shapeAnchorsTransform.Length; ++i)
+            shapeAnchorsTransform[i].x *= -1;
 
         if (mirrorY_)
             for (int i = 0; i < shapeAnchorsTransform.Length; ++i)
@@ -781,8 +796,6 @@ public class ShapeRenderer : MonoBehaviour
         float[] u = new float[verticesSize];
         float[] v = new float[verticesSize];
         int[] indices = new int[indicesSize];
-
-
 
         // call DLL
         int result = 0;
