@@ -8,9 +8,9 @@
 
 ## About
 
-ShapeRenderer is a simple yet powerful tool for creating vector graphics directly in the Unity editor. With ShapeRender you can create and stylize any shapes you want on the fly without ever having to use third-party software. Because it creates dynamic meshes, your art will scale to any resolution without pixelation and your build sizes can be kept to a minimum. ShapeRender has an easy-to-use (and not overly bloated) interface similar to other built-in Renderer components. Simply attach a ShapeRender component to any GameObject and use the numerous appearance options to create your art. The ShapeRenderer component can also be controlled through scripting to achieve dynamic 2D animations, and supports 2D colliders for physics as well.
+ShapeRenderer is a simple yet powerful tool for creating vector graphics directly in the Unity editor. With ShapeRenderer you can create and stylize any shapes you want on the fly without ever having to use third-party software. Because it creates dynamic meshes, your art will scale to any resolution without pixelation and your build sizes can be kept to a minimum. ShapeRenderer has an easy-to-use (and not overly bloated) interface similar to other built-in Renderer components. Simply attach a ShapeRenderer component to any GameObject and use the numerous appearance options to create your art. The ShapeRenderer component can also be controlled through scripting to achieve dynamic 2D animations, and supports 2D colliders for physics as well.
 
-This project was born out of my frustration with having to constantly reopen Photoshop/Illustrator every time I needed to make changes to my art. It has also proven particularly useful for programmatically animating geometric shapes. While similar packages are available on the Asset Store for a fee, very few free alternatives exist. Hopefully ShapeRender can fill this void and help you make games quickly like it has helped me. Enjoy!
+This project was born out of my frustration with having to constantly reopen Photoshop/Illustrator every time I needed to make changes to my art. It has also proven particularly useful for programmatically animating geometric shapes. While similar packages are available on the Asset Store for a fee, very few free alternatives exist. Hopefully ShapeRenderer can fill this void and help you make games quickly like it has helped me. Enjoy!
 
 ## Main Features
 
@@ -60,7 +60,7 @@ This project was born out of my frustration with having to constantly reopen Pho
 
 ## Coming Eventually (Maybe)
 
-In order of most likely to least likely, these are some things I may eventually add to ShapeRender (feel free to make contributions toward any!):
+In order of most likely to least likely, these are some things I may eventually add to ShapeRenderer (feel free to make contributions toward any!):
 
 - texture blend modes and opacity adjustment
 - linear gradient offset/shifting
