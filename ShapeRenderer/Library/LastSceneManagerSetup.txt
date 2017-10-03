@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/Scenes/Examples.unity
+- path: Assets/Scenes/Shapes.unity
   isLoaded: 1
   isActive: 1

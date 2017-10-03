@@ -57,6 +57,7 @@ This project was born out of my frustration with having to constantly reopen Pho
 ## Known Issues/Quirks
 
 - Stroke width may or may not change in real-time while in Editor mode. It will, however, update correctly in Play mode. This seems to be an issue with Unity's built-in LineRenderer component. I'm still investigating.
+- Copying a GameObject with a ShapeRenderer may create an issue where meshes are shared. This will be fixed in the next update.
 
 ## Coming Eventually (Maybe)
 
